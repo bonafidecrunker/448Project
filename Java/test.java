@@ -16,9 +16,10 @@ public class test {
 
         g.addEdge(a, b);
         g.addEdge(b, c);
+        g.addEdge(c, a);
 
         g.adjMatrix();
 
-        g.multiplyMatrices(2);
+        g.multiplyMatrices(3);
     }
 }

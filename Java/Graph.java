@@ -49,21 +49,28 @@ class Graph {
 
     public double[][] multiplyMatrices(int factor){ 
         double result[][] = this.adjMatrix;
+        double temp[][] = new double[adjMatrix.length][adjMatrix.length];
+
         for(int f = 0; f < factor - 1; f++){
             for(int row = 0; row < result.length; row++){
                 for(int col = 0; col < result[row].length; col++){
-                    result[row][col] = multiplyMatricesCell(result, row, col);
+                   temp[row][col] = multiplyMatricesCell(result, adjMatrix, row, col);
                 }
             }
+            result = temp;
+            temp = new double[adjMatrix.length][adjMatrix.length];
         }
         System.out.println("Matrix^" + factor);
         printAdjMatrix(result);
        return result;
     }
 
-    public double multiplyMatricesCell(double[][] matrix, int row, int col){
+    public double multiplyMatricesCell(double[][] matrixA, double[][] matrixB, int row, int col){
         double result = 0;
-        result += matrix[row][col] * matrix[col][row];
+        for(int i = 0; i < matrixB.length; i++){
+            result += matrixA[row][i] * matrixB[i][col]; 
+        }
+       
         return result;
     }
 
@@ -72,7 +79,7 @@ class Graph {
             if(i == 0){
                 System.out.print("  ");
                 for(Node n: graph){
-                    System.out.print(n.label + " ");
+                    System.out.print(n.label + "    ");
                 }
  
                 System.out.println();
