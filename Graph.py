@@ -1,43 +1,31 @@
-from Node import *
 import pandas as pd
-import numpy as np
+import networkx as nx
 
 
 class Graph:
-    def __init__(self, graph=None):
-        if graph is None:
-            graph = []
-        self.graph = graph
+    def __init__(self, src_nodes=None, dest_nodes=None, weights=None):
+        self.src_nodes = src_nodes
+        self.dest_nodes = dest_nodes
+        self.weights = weights
 
     def __str__(self):
-        out = ''
-        for n in self.graph:
-            out += str(n) + ": " + str(self.graph[n]) + "\n"
-        return out
+        return 'Source: {}\nDestination: {}\nWeight: {}'.format(self.src_nodes, self.dest_nodes, self.weights)
 
-    def add_node(self, char):
-        node = Node(char)
-        if node not in self.graph:
-            self.graph.append(node)
+    def add_edge(self, node1, node2, weight):
+        self.src_nodes.append(node1)
+        self.dest_nodes.append(node2)
+        self.weights.append(weight)
 
-    def add_edge(self, node1, node2):
-        assert node1, node2 in self.graph
-        self.graph[node1].append(node2)
-        self.graph[node2].append(node1)
+    def __adjacency_matrix(self):
+        df = pd.DataFrame({'source': self.src_nodes,
+                           'destination': self.dest_nodes,
+                           'weight': self.weights})
+        g = nx.from_pandas_edgelist(df, 'source', 'destination', edge_attr='weight')
+        adj_mat = nx.adjacency_matrix(g)
+        return adj_mat.todense()
 
-    def build_adjacency_matrix(self):
-        n = len(self.graph)
-        adj_mat = [[0 for x in range(n)] for y in range(n)]
+    def print_adjacency_matrix(self):
+        am = self.__adjacency_matrix()
+        return pd.DataFrame(am, index=self.src_nodes, columns=self.src_nodes)
 
-        # grab the labels from the graph, add all the edges to the adjacency matrix
-        labels = []
-        for node in self.graph:
-            labels.append(node.label)
 
-        # loop through the graph and add all the edges to the adjacency matrix
-        for node in self.graph:
-            for edge in node.edges:
-                adj_mat[node][edge] = 1
-
-        df = pd.DataFrame(adj_mat, index=labels, columns=labels)
-        print(df)

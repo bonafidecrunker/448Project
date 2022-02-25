@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+import networkx as nx
 
 
 def matrix_power(matrix, index):
@@ -7,23 +7,9 @@ def matrix_power(matrix, index):
     return np.linalg.matrix_power(matrix, index)
 
 
-def build_adjacency_matrix(g):
-    graph = g.graph
-    n = len(graph)
-    adj_mat = [[0 for x in range(n)] for y in range(n)]
+def adjacency_matrix(dataframe):
+    g = nx.from_pandas_adjacency(dataframe)
 
-    # grab the labels from the graph and create a labels array for pretty formatting with pandas later
-    labels = []
-    for n in graph:
-        labels.append(n.label)
-
-    # loop through the graph and add all the edges to an adjacency matrix
-    for node in graph:
-        for edge in node.edges:
-            adj_mat[node][edge] = 1
-
-    df = pd.DataFrame(adj_mat, index=labels, columns=labels)
-    print(df)
 
 
 
