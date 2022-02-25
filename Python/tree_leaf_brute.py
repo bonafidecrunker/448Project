@@ -7,8 +7,6 @@ def matrix_power(matrix, index):
     return np.linalg.matrix_power(matrix, index)
 
 
-def adjacency_matrix(dataframe):
-    g = nx.from_pandas_adjacency(dataframe)
 
 
 
