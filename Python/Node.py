@@ -27,5 +27,3 @@ class Node:
     def get_edges(self):
         return self.edges
 
-    def add_edge(self, node, weight):
-        self.edges.append({node: weight})
