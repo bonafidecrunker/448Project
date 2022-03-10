@@ -17,10 +17,10 @@ def main():
             forbidden_graphs.append(graph)
     for graph in nx_graphs:
         print(graph.edges)
-    draw_graphs(non_p4_graphs)
+    draw_graphs(non_p4_graphs, "P4-free graphs")
 
 
-def draw_graphs(G):
+def draw_graphs(G, title):
     total = len(G)
     cols = 3
     rows = total // cols
@@ -28,6 +28,8 @@ def draw_graphs(G):
     position = range(1, total + 1)
 
     fig = plt.figure(figsize=(10, 10))
+    plt.title(title)
+    plt.axis('off')
     for k in range(total):
         ax = fig.add_subplot(rows, cols, position[k])
         nx.draw(G[k])
