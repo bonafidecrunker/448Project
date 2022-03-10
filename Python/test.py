@@ -1,5 +1,6 @@
 from Graph import *
 from G6_in import *
+from Logic import *
 
 
 def main():

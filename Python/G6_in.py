@@ -8,7 +8,19 @@ from Graph import *
 class G6_in():
 
     def __init__(self, file) -> None:
-        self.G = nx.read_graph6(file) 
+        self.G = nx.read_graph6(file)
+        self._index = 0
+        
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self._index >= len(self.G):
+            raise StopIteration
+        else:
+            temp = self.G[self._index]
+            self._index += 1
+            return temp
 
     def read_file(self, file):
         self.G = nx.read_graph6(file)
