@@ -1,5 +1,10 @@
-import pandas as pd
-import networkx as nx
+from Node import *
+from collections import deque
+
+
+def add_edge(src, dest):
+    src.edges.append(dest)
+    dest.edges.append(src)
 
 
 class Graph:
@@ -59,5 +64,27 @@ class Graph:
         """
         am = self.__adjacency_matrix()
         return pd.DataFrame(am, index=self.src_nodes, columns=self.src_nodes)
+    # def __init__(self, nodes=None):
+    #     if nodes is None:
+    #         nodes = []
+    #     self.nodes = nodes
+    #
+    # def add_node(self, label):
+    #     new_node = Node(label)
+    #     self.nodes.append(new_node)
+    #
+    # def bfs(self):
+    #     if not self.nodes:
+    #         return []
+    #     start = self.nodes[0]
+    #     visited, queue, result = {start}, deque([start]), []
+    #     while queue:
+    #         node = queue.popleft()
+    #         result.append(node)
+    #         for node in node.edges:
+    #             if node not in visited:
+    #                 queue.append(node)
+    #                 visited.add(node)
+    #     return result
 
 

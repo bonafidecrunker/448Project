@@ -1,12 +1,12 @@
 from Graph import *
+from G6_in import *
 
 
 def main():
-    source = ['a', 'b', 'c', 'd', 'e']
-    destination = ['b', 'c', 'd', 'e', 'a']
-    weights = [1, 1, 1, 1, 1]
-    g = Graph(source, destination, weights)
-    print(g.print_adjacency_matrix())
+    testFile = 'graph_files/std_geng4_c.g6'
+    g = G6_in(testFile)
+    g.create_graph()
+    g.draw_graphs()
 
 
 main()
