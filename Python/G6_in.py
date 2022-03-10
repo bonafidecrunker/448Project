@@ -1,6 +1,3 @@
-import itertools
-from msilib.schema import SelfReg
-import networkx as nx
 import matplotlib.pyplot as plt
 from Graph import *
 
@@ -32,7 +29,8 @@ class G6_in():
     def draw_graphs(self):
         n = int(len(self.G) / 2)
         for i in range(len(self.G)):
-            plt.subplot(n, n, i + 1)
+            plt.subplot(n, 3, i + 1)
+            fig.subplots_adjust(wspace=0.05, hspace=0.5)
             nx.draw(self.G[i])
 
         plt.tight_layout()
