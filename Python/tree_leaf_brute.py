@@ -1,5 +1,4 @@
 import numpy as np
-import networkx as nx
 
 
 def matrix_power(matrix, index):

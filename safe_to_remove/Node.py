@@ -2,6 +2,9 @@ from operator import index
 
 
 class Node:
+    """
+    Currently unnecessary. Probably safe to remove.
+    """
     def __init__(self, label):
         self.label = label
         self.edges = []
