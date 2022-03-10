@@ -7,14 +7,14 @@ def main():
     g = G6_in(test_file)
     nx_graphs = g.create_graphs()
     counter = 1
-    temp_graphs = []
+    forbidden_graphs, non_p4_graphs = [], []
     for graph in nx_graphs:
         print("Graph # {}".format(counter))
         counter += 1
         if not Logic.has_p4(graph):
-            temp_graphs.append(graph)
-
-    nx_graphs = temp_graphs
+            non_p4_graphs.append(graph)
+        else:
+            forbidden_graphs.append(graph)
     for graph in nx_graphs:
         print(graph.edges)
         nx.draw(graph)

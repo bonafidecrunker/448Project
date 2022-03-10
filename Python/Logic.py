@@ -26,3 +26,5 @@ class Logic:
                         print("P4 does exist")
                         return True
         return False
+
+

@@ -28,11 +28,27 @@ class G6_in():
     
     def draw_graphs(self):
         n = int(len(self.G) / 2)
+
+        fig = plt.figure(figsize=(10, 10))
         for i in range(len(self.G)):
             plt.subplot(n, 3, i + 1)
             fig.subplots_adjust(wspace=0.05, hspace=0.5)
             nx.draw(self.G[i])
 
+        plt.tight_layout()
+        plt.show()
+
+    def draw_graphs2(self):
+        total = len(self.G)
+        cols = 3
+        rows = total // cols
+        rows += total % cols
+        position = range(1, total + 1)
+
+        fig = plt.figure(figsize=(10, 10))
+        for k in range(total):
+            ax = fig.add_subplot(rows, cols, position[k])
+            nx.draw(self.G[k])
         plt.tight_layout()
         plt.show()
 
