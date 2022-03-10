@@ -7,10 +7,6 @@ class Node:
         self.edges = []
 
     def __str__(self):
-        # out = self.label + ": "
-        # for inner_dict in self.edges:
-        #     out += str(inner_dict) + " "
-        # return out
         return self.label
 
     def __eq__(self, other):
@@ -27,5 +23,5 @@ class Node:
     def get_edges(self):
         return self.edges
 
-    def add_edge(self, node, weight):
-        self.edges.append({node: weight})
+    def add_edge(self, node):
+        self.edges.append(node)

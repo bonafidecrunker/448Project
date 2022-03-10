@@ -26,25 +26,16 @@ class G6_in():
         plt.tight_layout()
         plt.show()
 
-    def create_graph(self):
+    def create_graphs(self):
+        """
+        Make the g6 graph into our native Graph class.
+        :return: array of Graph objects
+        """
         out = []
         for g in self.G:
-            source = []
-            destination = []
-            weight = []
-            edge_list = g.edges()
-            for e in edge_list:
-                print(e[0], end=" ")
-                print(e[1])
-
-                source.append(e[0])
-                destination.append(e[1])
-                weight.append(1)
-            
-            temp_graph = Graph(source, destination, weight)
+            temp_graph = nx.Graph()
+            temp_graph.add_edges_from(g.edges())
             out.append(temp_graph)
         return out
 
 
-test = G6_in('./graph_files/std_geng4_c.g6')
-test.create_graph()
