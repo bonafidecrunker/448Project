@@ -17,9 +17,7 @@ def main():
             forbidden_graphs.append(graph)
     for graph in nx_graphs:
         print(graph.edges)
-        nx.draw(graph)
-    # g.draw_graphs()
-    draw_graphs(nx_graphs)
+    draw_graphs(non_p4_graphs)
 
 
 def draw_graphs(G):
