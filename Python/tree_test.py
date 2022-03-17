@@ -1,16 +1,33 @@
 from TreeIn import *
-from test import draw_graphs
-import networkx as nx
-import matplotlib as plt
+import os
+from Graph_Draw import *
 
 
-def main():
-    tree = 'tree_files/tree4.2.txt'
-    g = TreeIn(tree)
+def main(file):
+    g = TreeIn(file)
     graphs = g.get_graphs()
-    for a in graphs:
-        print(a)
+    draw_graphs(graphs, "Graphs")
     exit(0)
 
 
-main()
+def load_all_graphs():
+    directory = os.fsencode('tree_files_subset')
+    graphs = []
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        if filename.endswith('.txt'):
+            temp = str(directory.decode("utf-8")) + "\\" + str(filename)
+            g = TreeIn(temp)
+            for i in g.get_graphs():
+                graphs.append(i)
+
+    #print(graphs)
+    draw_graphs(graphs, "asd")
+    exit(0)
+
+    print(graphs)
+    #draw_graphs(graphs,"asd")
+
+
+main('tree_files/tree6.3.txt')
+main('tree_files/tree6.4.txt')
