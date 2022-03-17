@@ -21,6 +21,7 @@ class TreeIn:
     def _create_graphs(self):
         f = open(self.file, "r")
         for line in f:
+            line = line.replace("\n", "")
             edges = line.split('  ')
             graph = nx.Graph()
             for pair in edges:
