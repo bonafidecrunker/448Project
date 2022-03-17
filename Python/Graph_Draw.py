@@ -28,8 +28,6 @@ def draw_graphs(g, title):
     for k in range(total):
         ax = fig.add_subplot(rows, cols, position[k])
         ax.set_title('Graph {}'.format(k + 1))
-        #nx.draw(g[k], with_labels='True', font_color='#bab0ac', node_color='#4e79a7')
-        nx.draw(g[k])
-
+        nx.draw(g[k], with_labels='True', font_color='#bab0ac', node_color='#4e79a7')  
     plt.tight_layout()
     plt.show()

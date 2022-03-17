@@ -5,12 +5,21 @@ from Graph_Draw import *
 
 def main():
     #partition(graphs)
-    graphs, out = load_g6_leaf2(False)
-    for i in range(len(graphs)):
-        if len(graphs[i].nodes) < 7:
-            print(out[i], graphs[i])
-            draw_graph(graphs[i], out[i])
+    graphs, names = load_g6_leaf2(False)
+    draw_partitioned_graphs(graphs, names)
 
+
+def draw_partitioned_graphs(graphs, names):
+    out = {}
+    for i in range(len(graphs)):
+        print(names[i], graphs[i])
+        out.setdefault(names[i],[]).append(graphs[i])
+
+    for key in out.keys():
+        if len(out.get(key)) > 1:
+            draw_graphs(out.get(key), key)
+        else:
+            draw_graph(out.get(key)[0], key)
 
 def load_all_graphs():
     directory = os.fsencode('tree_files_subset')
