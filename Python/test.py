@@ -2,8 +2,9 @@ from g6In import *
 from Logic import *
 import time
 
+
 def main():
-    test_file = 'graph_files/std_geng9_c.g6'
+    test_file = 'graph_files/std_geng5_c.g6'
     g = g6In(test_file)
     nx_graphs = g.create_graphs()
     counter = 1
@@ -26,7 +27,7 @@ def main():
     print(len(non_p4_graphs), end="\n\n")
     print("Forbidden Graphs")
     print(len(forbidden_graphs))
-    print("Total Completetion Time {}".format(t1-t0))
+    print("Total Completion Time {}".format(t1-t0))
     
 
 def draw_graphs(g, title):

@@ -6,6 +6,7 @@ class g6In:
     def __init__(self, file_path) -> None:
         """
         Reads in the file path of a g6 file and creates a list of networkx graph from the binary info in the file
+
         :param file_path: relative or absolute file path to the g6 file
         """
         self.G = nx.read_graph6(file_path)
@@ -58,6 +59,7 @@ class g6In:
     def create_graphs(self):
         """
         Make the g6 graph into a list of individual networkx graphs.
+
         :return: list of Graph objects
         """
         out = []

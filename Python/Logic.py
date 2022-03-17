@@ -9,6 +9,7 @@ class Logic:
     def contains_forbidden_subgraph(self, g, forbiddens):
         """
         Checks to see if a graph contains a known forbidden subgraph.
+
         :param g: networkx graph
         :param forbiddens: a list of forbidden graphs
         :return: Boolean value depending on whether the graph contains forbidden subgraphs or not
@@ -24,6 +25,7 @@ class Logic:
         """
         Generates all possible edge list permutations and checks if there exists a 4-path with no other connections
         back on itself i.e., only a 4 path, no cycles allowed.
+
         :param g: networkx graph
         :return: Boolean value depending on whether the graph has a p4 or not
         """
