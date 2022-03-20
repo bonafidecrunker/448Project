@@ -1,8 +1,6 @@
 import itertools
-from re import S
-from socket import socket
-
-from numpy import sort
+import networkx as nx
+import numpy as np
 
 
 class Logic:
@@ -67,8 +65,21 @@ class Logic:
                 #    else:
                         # print("P4 does exist")
                 #        return True
-        sorted_list = sort([v0, v1, v2, v3])
+        sorted_list = np.sort([v0, v1, v2, v3])
         if sorted_list[0] == sorted_list[1] == 1 and sorted_list[2] == sorted_list[3] == 2:
             return True
         return False
+
+    @staticmethod
+    def k_leaf_power(adj_matrix, k):
+        gk_minus_one = np.zeros_like(adj_matrix)
+        for i in range(1, k):
+            if i == 1:
+                gk_minus_one = adj_matrix
+            else:
+                gk_minus_one = np.linalg.matrix_power(adj_matrix, i) + np.array(gk_minus_one)
+        gk = nx.from_numpy_matrix(np.array(gk_minus_one))
+        return gk
+
+
 
