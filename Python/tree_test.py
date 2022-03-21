@@ -1,12 +1,19 @@
 from TreeIn import *
 import os
 from Graph_Draw import *
+from Logic import *
+import pandas as pd
 
 
 def main():
-    #partition(graphs)
-    graphs, names = load_g6_leaf2(False)
-    draw_partitioned_graphs(graphs, names)
+    graph = nx.read_graph6('leaf_files/Tree9.4.4.g6')
+    draw_graph(graph, '9.4.4')
+    graph = nx.to_numpy_matrix(graph)
+    test = Logic.k_leaf_power(graph, 3)
+    test = test.astype(int)
+    test = pd.DataFrame(test, columns=range(9), index=range(9))
+    print(test)
+    exit(0)
 
 
 def draw_partitioned_graphs(graphs, names):
@@ -20,6 +27,7 @@ def draw_partitioned_graphs(graphs, names):
             draw_graphs(out.get(key), key)
         else:
             draw_graph(out.get(key)[0], key)
+
 
 def load_all_graphs():
     directory = os.fsencode('tree_files_subset')
@@ -109,4 +117,3 @@ def count_leaves(graphs):
 
 
 main()
-exit(0)

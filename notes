@@ -1,0 +1,9 @@
+March 18
+things we need:
+- all connected 4-vertex graphs
+- all 4-vertex leaf powers (i.e., for n.d.k files, all i.j.4 files)
+  - function that finds all graphs of connections by computing powers of a graph until a clique is reached
+  - max possible number for x in Gx is going to be j or j - 1
+  - look for networkx all pairs shortest path
+    - go through all pairs of leaves and computer their shortest path
+  - ideally, the only ones that do not match between the two lists of files will be the ones that have C4'2

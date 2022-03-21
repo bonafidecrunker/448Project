@@ -48,9 +48,9 @@ class Logic:
             #for p in permutations:
             if g.has_edge(c[0], c[1]):
                 v0, v1 = v0 + 1, v1 + 1
-            if g.has_edge(c[1],c[2]):
+            if g.has_edge(c[1], c[2]):
                 v1, v2 = v1 + 1, v2 + 1
-            if g.has_edge(c[2],c[3]):
+            if g.has_edge(c[2], c[3]):
                 v2, v3 = v2 + 1, v3 + 1
             if g.has_edge(c[0], c[3]):
                 v0, v3 = v0 + 1, v3 + 1
@@ -78,8 +78,8 @@ class Logic:
                 gk_minus_one = adj_matrix
             else:
                 gk_minus_one = np.linalg.matrix_power(adj_matrix, i) + np.array(gk_minus_one)
-        gk = nx.from_numpy_matrix(np.array(gk_minus_one))
-        return gk
+        # gk = nx.from_numpy_matrix(np.array(gk_minus_one))
+        return gk_minus_one
 
 
 
