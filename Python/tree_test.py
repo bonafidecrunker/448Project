@@ -1,3 +1,4 @@
+from functools import reduce
 from TreeIn import *
 import os
 from Graph_Draw import *
@@ -6,15 +7,42 @@ import pandas as pd
 
 
 def main():
-    graph = nx.read_graph6('leaf_files/Tree9.4.4.g6')
-    draw_graph(graph, '9.4.4')
+    test2 = nx.from_edgelist([(0,1),(1,2),(2,3),(3,0)])
+    nx.add_cycle(test2, [3,6,5,3,2])
+    nx.add_cycle(test2, [3,4,0])
+    nx.add_cycle(test2, [3,4,6])
+    v_d_l = ['7','4','4'] #Vertex, Diameter, Leaf
+    leaf_power = 2
+    test_file = '.'.join(v_d_l)
+    #graph = nx.read_graph6('leaf_files/Tree' + test_file + '.g6')
+    #if isinstance(graph, list):
+    #    graph = graph[0]
+    graph = test2
+    draw_graph(graph, test_file)
     graph = nx.to_numpy_matrix(graph)
-    test = Logic.k_leaf_power(graph, 3)
+    test = Logic.k_leaf_power(graph, leaf_power)
+    test = reduce_to_ones(test)
     test = test.astype(int)
-    test = pd.DataFrame(test, columns=range(9), index=range(9))
+    test = pd.DataFrame(test, columns=range(int(v_d_l[0])), index=range(int(v_d_l[0])))
     print(test)
+    
+    graph_square = nx.from_pandas_adjacency(test)
+    clique_counter = 0 
+    for clq in nx.clique.find_cliques(graph_square):
+        clique_counter = clique_counter + 1
+        print(clq)
+    
+    for cycle in nx.cycle_basis(graph_square):
+        if(len(cycle) > 3):
+            print("cycle " + str(cycle))
+    draw_graph(graph_square, test_file + ' Leaf Power: ' + str(leaf_power) + ', # of cliques: ' + str(clique_counter))
     exit(0)
 
+def reduce_to_ones(adj_matrix):
+    temp = np.where(adj_matrix >= 1, 1, 0)
+    for i in range(len(temp)):
+        temp[i][i] = 0
+    return temp
 
 def draw_partitioned_graphs(graphs, names):
     out = {}
@@ -27,7 +55,6 @@ def draw_partitioned_graphs(graphs, names):
             draw_graphs(out.get(key), key)
         else:
             draw_graph(out.get(key)[0], key)
-
 
 def load_all_graphs():
     directory = os.fsencode('tree_files_subset')
