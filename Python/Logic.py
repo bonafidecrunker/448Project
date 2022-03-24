@@ -3,6 +3,13 @@ import networkx as nx
 import numpy as np
 
 
+def reduce_to_ones(adj_matrix):
+    temp = np.where(adj_matrix >= 1, 1, 0)
+    for i in range(len(temp)):
+        temp[i][i] = 0
+    return temp
+
+
 class Logic:
     def contains_forbidden_subgraph(self, g, forbiddens):
         """
@@ -87,6 +94,7 @@ class Logic:
             else:
                 gk_minus_one = np.linalg.matrix_power(adj_matrix, i + 1) + np.array(gk_minus_one) # changed from (adj_matrix, i)
         # gk = nx.from_numpy_matrix(np.array(gk_minus_one))
+        gk_minus_one = reduce_to_ones(gk_minus_one)
         return gk_minus_one
 
     @staticmethod

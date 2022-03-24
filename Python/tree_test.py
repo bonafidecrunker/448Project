@@ -1,7 +1,5 @@
 from functools import reduce
-
 import networkx as nx
-
 from TreeIn import *
 import os
 from Graph_Draw import *
@@ -39,18 +37,12 @@ def main():
     #     if len(cycle) > 3:
     #         print("cycle " + str(cycle))
     # draw_graph(graph_square, test_file + ' Leaf Power: ' + str(leaf_power) + ', # of cliques: ' + str(clique_counter))
+
     trees_filepath = 'leaf_files/Tree7.3.5.g6'
     graphs_filepath = 'graph_files/std_geng7_c.g6'
-    compare_trees_graphs(graphs_filepath, trees_filepath, 5)
+    compare_trees_graphs(graphs_filepath, trees_filepath, 4)
 
     exit(0)
-
-
-def reduce_to_ones(adj_matrix):
-    temp = np.where(adj_matrix >= 1, 1, 0)
-    for i in range(len(temp)):
-        temp[i][i] = 0
-    return temp
 
 
 def draw_partitioned_graphs(graphs, names):
@@ -67,7 +59,7 @@ def draw_partitioned_graphs(graphs, names):
 
 
 def load_all_graphs():
-    directory = os.fsencode('tree_files_subset')
+    directory = os.fsencode('tree_files_subset2')
     graphs = []
     for file in os.listdir(directory):
         filename = os.fsdecode(file)
@@ -132,7 +124,7 @@ def partition(graphs):
             if node[1] == 1:
                 l += 1
         filename = build_filename(n, d, l)
-        with open("leaf_files/"+filename, "a+") as f:
+        with open("leaf_files2/"+filename, "a+") as f:
             f.write(nx.to_graph6_bytes(g).decode("utf-8").replace(">>graph6<<", ""))
 
 
@@ -154,6 +146,17 @@ def count_leaves(graphs):
 
 
 def compare_trees_graphs(graphs_file_path, trees_file_path, index, num_nodes=None):
+    """
+    Compares the k-leaf power of all k-leaf trees of num_nodes nodes with all possible graphs of num_nodes nodes.
+    Comparison is carried out using string comparison of generated g6 format byte-string codes in a list-wise fashion.
+    Performance improvements are likely to occur through implementation of hashing for these values.
+
+    :param graphs_file_path: file path to the file containing the graphs of num_nodes
+    :param trees_file_path: file path to the file containing the trees of num_nodes and index leaves
+    :param index: simultaneously the number of leaves in a tree and the k-leaf power to which to raise the tree
+    :param num_nodes: optional number of nodes in the graphs
+    :return: n/a
+    """
     trees_in = nx.read_graph6(trees_file_path)
     trees = []
     graphs = []
@@ -163,19 +166,16 @@ def compare_trees_graphs(graphs_file_path, trees_file_path, index, num_nodes=Non
     for graph in graphs_in:
         graphs.append(nx.to_graph6_bytes(graph, header=False))
     print("Trees\tNum Trees: {}\n".format(len(trees)), trees, "\nGraphs\tNum Graphs: {}\n".format(len(graphs)), graphs)
-    k_leaf_powers = []
+    k_leaf_powers = set()
     for t in trees_in:
         temp = nx.to_numpy_matrix(t)
         temp = Logic.k_leaf_power(temp, index)
         temp = nx.Graph(temp)
         draw_graph(temp, "G")
-        k_leaf_powers.append(nx.to_graph6_bytes(temp, header=False))
+        k_leaf_powers.add(nx.to_graph6_bytes(temp, header=False))
     print('{}-leaf powers\n'.format(index), k_leaf_powers)
     for i in k_leaf_powers:
-        if i in graphs:
-            print("index: {}\tTrue".format(i))
-        else:
-            print("index: {}\tFalse".format(i))
+        print(i)
 
 
 main()
