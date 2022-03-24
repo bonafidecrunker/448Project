@@ -70,24 +70,26 @@ class Logic:
             return True
         return False
 
-
+    @staticmethod
     def k_leaf_power(adj_matrix, k):
         """
-        Generates the k-leaf power for a given graph. See https://en.wikipedia.org/wiki/Leaf_power for explanations on k-leaf power.
+        Generates the k-leaf power for a given graph. See https://en.wikipedia.org/wiki/Leaf_power for explanations on
+        k-leaf power.
         
         :param adj_matrix: the graph in adjacency matrix form
         :param k: the index to which to raise the graph 
         :return: the adjacency matrix representation of the k-leaf power of the graph 
         """
         gk_minus_one = np.zeros_like(adj_matrix)
-        for i in range(0, k): #changed from range(1,k)
-            if i == 0: #changed from i == 1
+        for i in range(0, k): # changed from range(1,k)
+            if i == 0: # changed from i == 1
                 gk_minus_one = adj_matrix
             else:
-                gk_minus_one = np.linalg.matrix_power(adj_matrix, i + 1) + np.array(gk_minus_one) #changed from (adj_matrix, i)
+                gk_minus_one = np.linalg.matrix_power(adj_matrix, i + 1) + np.array(gk_minus_one) # changed from (adj_matrix, i)
         # gk = nx.from_numpy_matrix(np.array(gk_minus_one))
         return gk_minus_one
 
+    @staticmethod
     def k_leaf_recursion(adj_matrix, k):
         temp_matrix = adj_matrix
         print(temp_matrix)
