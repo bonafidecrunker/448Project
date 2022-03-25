@@ -40,10 +40,37 @@ def main():
 
     trees_filepath = 'leaf_files/Tree7.3.5.g6'
     graphs_filepath = 'graph_files/std_geng7_c.g6'
-    compare_trees_graphs(graphs_filepath, trees_filepath, 4)
+    #compare_trees_graphs(graphs_filepath, trees_filepath, 4)
+    test_graph = nx.from_edgelist([(0,1),(1,2),(2,3),(2,4),(4,5),(4,6)])
+    #draw_graph(test_graph, "test")
+    
+    # test_graph_k_power = nx.to_numpy_matrix(test_graph)
+    # test_graph_k_power = Logic.k_leaf_power(test_graph_k_power, 3)
+    # test_graph_k_power = nx.Graph(test_graph_k_power)
+    # induced = nx.induced_subgraph(test_graph_k_power, [0,3,5,6])
+    
+    load_all_graphs(4)
+
+    # nbunch = get_leaf_nodes(test_graph)
+    # test_graph = nx.power(test_graph, 3)
+   
+    # induce = nx.induced_subgraph(test_graph, nbunch)
+    
+    # draw_graph(induce, "induced")
+    
+
 
     exit(0)
 
+
+
+def get_leaf_nodes(test_graph):
+    out = []
+    for node in test_graph.degree():
+        if node[1] == 1:
+            out.append(node[0])
+
+    return out
 
 def draw_partitioned_graphs(graphs, names):
     out = {}
@@ -58,18 +85,33 @@ def draw_partitioned_graphs(graphs, names):
             draw_graph(out.get(key)[0], key)
 
 
-def load_all_graphs():
+def load_all_graphs(index=None):
     directory = os.fsencode('tree_files_subset2')
     graphs = []
-    for file in os.listdir(directory):
-        filename = os.fsdecode(file)
-        if filename.endswith('.txt'):
-            temp = str(directory.decode("utf-8")) + "\\" + str(filename)
-            g = TreeIn(temp)
+    if index == None:
+        nodes_and_diameters = [i for i in  range(2 * index + 2)]
+        for nodes in nodes_and_diameters:
+            node = nodes
+            for diameters in nodes_and_diameters:
+                diameter = diameters
+                filename_ends_with = str(nodes) + '.' + str(diameter) + '.' + str(index) + '.g6'
+                temp_graphs = load_graphs(filename_ends_with)
+                for g in temp_graphs:
+                    graphs.append(g)
+    else:
+        load_graphs()
+    return graphs
+
+def load_graphs(file_ends_with='.g6'):
+    directory = os.fsdecode('tree_files_subset2')
+    graphs = []
+    for file in os.listdir(file):
+        if file.endswith(file_ends_with):
+            temp = str(directory.decode("utf-8")) + "\\" + str(file_ends_with)
+            g = nx.read_graph6(temp)
             for i in g.get_graphs():
                 graphs.append(i)
     return graphs
-
 
 def load_g6_leaf(bool):
     directory = os.fsencode('leaf_files')

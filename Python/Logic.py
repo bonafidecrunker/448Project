@@ -1,6 +1,7 @@
 import itertools
 import networkx as nx
 import numpy as np
+import pandas as pd
 
 
 def reduce_to_ones(adj_matrix):
@@ -91,8 +92,11 @@ class Logic:
         for i in range(0, k): # changed from range(1,k)
             if i == 0: # changed from i == 1
                 gk_minus_one = adj_matrix
+                
+                print(pd.DataFrame(reduce_to_ones(gk_minus_one), columns=range(len(adj_matrix)), index=range(len(adj_matrix))).astype(int))
             else:
                 gk_minus_one = np.linalg.matrix_power(adj_matrix, i + 1) + np.array(gk_minus_one) # changed from (adj_matrix, i)
+                print(pd.DataFrame(reduce_to_ones(gk_minus_one), columns=range(len(adj_matrix)), index=range(len(adj_matrix))).astype(int))
         # gk = nx.from_numpy_matrix(np.array(gk_minus_one))
         gk_minus_one = reduce_to_ones(gk_minus_one)
         return gk_minus_one
