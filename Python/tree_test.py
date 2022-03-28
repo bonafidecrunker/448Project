@@ -2,6 +2,7 @@ from functools import reduce
 import networkx as nx
 from TreeIn import *
 import os
+from os.path import exists
 from Graph_Draw import *
 from Logic import *
 import pandas as pd
@@ -49,7 +50,27 @@ def main():
     # test_graph_k_power = nx.Graph(test_graph_k_power)
     # induced = nx.induced_subgraph(test_graph_k_power, [0,3,5,6])
     
-    load_all_graphs(4)
+    """
+    Load in all connected 4 vertex graphs
+    geng
+    """
+    four_vertex_graphs = set()
+    induced_graphs_set = set()
+    
+    trees = load_all_graphs(4)
+    for tree in trees:
+        nbunch = get_leaf_nodes(tree)
+        temp_graph = nx.power(tree, 4)
+        induced_graph = nx.induced_subgraph(temp_graph, nbunch)
+        induced_graphs_set.add(induced_graph)
+
+    g6_induced_graphs_set = {nx.to_graph6_bytes(i) for i in induced_graphs_set}
+    g6_four_vertex_graphs = {nx.to_graph6_bytes(i) for i in four_vertex_graphs}
+ 
+    g6_compare_induced_four_vertex = g6_induced_graphs_set.difference(g6_four_vertex_graphs)
+    for g in g6_compare_induced_four_vertex:
+        draw_graph(nx.from_graph6_bytes(g))
+    
 
     # nbunch = get_leaf_nodes(test_graph)
     # test_graph = nx.power(test_graph, 3)
@@ -86,32 +107,33 @@ def draw_partitioned_graphs(graphs, names):
 
 
 def load_all_graphs(index=None):
-    directory = os.fsencode('tree_files_subset2')
-    graphs = []
-    if index == None:
+    graphs = set()
+    if index != None:
         nodes_and_diameters = [i for i in  range(2 * index + 2)]
         for nodes in nodes_and_diameters:
-            node = nodes
-            for diameters in nodes_and_diameters:
-                diameter = diameters
+            for diameter in nodes_and_diameters:
                 filename_ends_with = str(nodes) + '.' + str(diameter) + '.' + str(index) + '.g6'
-                temp_graphs = load_graphs(filename_ends_with)
-                for g in temp_graphs:
-                    graphs.append(g)
+                temp_graphs = load_graph(filename_ends_with)
+                graphs.update(temp_graphs)
     else:
-        load_graphs()
+        temp_graphs = load_graph()
+        graphs.update(temp_graphs)
     return graphs
 
-def load_graphs(file_ends_with='.g6'):
-    directory = os.fsdecode('tree_files_subset2')
-    graphs = []
-    for file in os.listdir(file):
-        if file.endswith(file_ends_with):
-            temp = str(directory.decode("utf-8")) + "\\" + str(file_ends_with)
-            g = nx.read_graph6(temp)
-            for i in g.get_graphs():
-                graphs.append(i)
-    return graphs
+def load_graph(file_ends_with='.g6'):
+    directory = os.fsdecode('leaf_files')
+    graphs_set = set()
+    temp = str(directory)  + '\Tree' + str(file_ends_with)
+    file_exists = exists(temp)
+    if file_exists:
+        graph = nx.read_graph6(temp)
+        if type(graph) is list:
+            for g in graph:
+                temp_graph = nx.Graph(g)
+                graphs_set.add(temp_graph)
+        else:
+            graphs_set.add(graph)
+    return graphs_set
 
 def load_g6_leaf(bool):
     directory = os.fsencode('leaf_files')
