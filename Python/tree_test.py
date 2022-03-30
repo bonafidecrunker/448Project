@@ -1,11 +1,13 @@
 from functools import reduce
 import networkx as nx
+from numpy import empty
 from TreeIn import *
 import os
 from os.path import exists
 from Graph_Draw import *
 from Logic import *
 import pandas as pd
+
 
 
 def main():
@@ -38,38 +40,166 @@ def main():
     #     if len(cycle) > 3:
     #         print("cycle " + str(cycle))
     # draw_graph(graph_square, test_file + ' Leaf Power: ' + str(leaf_power) + ', # of cliques: ' + str(clique_counter))
-
-    trees_filepath = 'leaf_files/Tree7.3.5.g6'
-    graphs_filepath = 'graph_files/std_geng7_c.g6'
-    #compare_trees_graphs(graphs_filepath, trees_filepath, 4)
-    test_graph = nx.from_edgelist([(0,1),(1,2),(2,3),(2,4),(4,5),(4,6)])
-    #draw_graph(test_graph, "test")
-    
-    # test_graph_k_power = nx.to_numpy_matrix(test_graph)
-    # test_graph_k_power = Logic.k_leaf_power(test_graph_k_power, 3)
-    # test_graph_k_power = nx.Graph(test_graph_k_power)
-    # induced = nx.induced_subgraph(test_graph_k_power, [0,3,5,6])
-    
+   
     """
     Load in all connected 4 vertex graphs
     geng
     """
     four_vertex_graphs = set()
     induced_graphs_set = set()
-    
+
+
+
+    file_path = 'graph_files/std_geng4_c.g6'
+    graphs = nx.read_graph6(file_path)
+    for g in graphs:
+        four_vertex_graphs.add(g)
+
+    induced_graphs_list = []
     trees = load_all_graphs(4)
+    draw_graph(nx.from_graph6_bytes(b'Ci'))
+    temp_set = set()
     for tree in trees:
         nbunch = get_leaf_nodes(tree)
         temp_graph = nx.power(tree, 4)
         induced_graph = nx.induced_subgraph(temp_graph, nbunch)
-        induced_graphs_set.add(induced_graph)
+        print(node_degree_func(induced_graph))
+        if nx.is_connected(induced_graph):  
+            induced_graphs_set.add(induced_graph)
+            
+            if node_degree_func(induced_graph) == [1,1,1,3]:
+                 draw_graph(tree)
+            # else: 
+            #     print("We ain't found shit spaceballs ref")
+    induced_degree_set = []
+    for g in induced_graphs_set:
+        node_degree = []
+        for node in g.degree():
+            node_degree.append(node[1])
+        node_degree = sorted(node_degree)
+        if node_degree == [1,1,1,3]:
+            print("I exist. Yay!")
+        if node_degree not in induced_degree_set:
+            # draw_graph(g)
+            induced_degree_set.append(node_degree)
+    four_vertex_degree_set= []
+    for g in four_vertex_graphs:
+        node_degree = []
+        for node in g.degree():
+            node_degree.append(node[1])
+        node_degree = sorted(node_degree)
+        if node_degree not in four_vertex_degree_set:
+            # draw_graph(g)
+            four_vertex_degree_set.append(node_degree)
+    
+    # leftovers = []
+    # for l in induced_degree_set:
+    #     if l not in four_vertex_degree_set:
+    #         leftovers.append(l)
+    temp_out_list = [x for x in four_vertex_degree_set if x not in induced_degree_set]
+    print(f"4v {four_vertex_degree_set}")
+    print(f"Iv {induced_degree_set}")
+    print(temp_out_list)
+    
+    """
+    induced_degree_set = []
+    induced_graphs_set = []
+    for tree in trees:
+        nbunch = get_leaf_nodes(tree)
+        temp_graph = nx.power(tree, 4)
+        induced_graph = nx.induced_subgraph(temp_graph, nbunch)
+        if nx.is_connected(induced_graph):  
+            induced_graphs_set.add(induced_graph)
+            if node_degree(induced_graph) == [1,1,1,3]:
+                draw_graph(tree)
 
-    g6_induced_graphs_set = {nx.to_graph6_bytes(i) for i in induced_graphs_set}
-    g6_four_vertex_graphs = {nx.to_graph6_bytes(i) for i in four_vertex_graphs}
+    """
+    """
+    possible degree lists for graphs of four nodes:
+    [1,1,2,2] => p4
+    [1,1,1,3] => arrow head
+    [1,2,2,3] => bow and arrow
+    [2,2,2,2] => c4 (square)
+    [2,2,3,3] => one outer edge (non chordal) removed from max clique
+    [3,3,3,3] => max clique
+    """
+
+    # for i in range(len(induced_graphs_list)):
+    #     for j in range(len(induced_graphs_list)):
+    #         if not nx.is_isomorphic(induced_graphs_list[i], induced_graphs_list[j]) and i != j:
+    #             temp_induced_graphs_set.add(induced_graphs_list[i])
+    # print(len(temp_induced_graphs_set))
+    # nodes = induced_graphs_list[0].nodes
+    # mapper = {}
+    # counter = 0
+    # for node in nodes:
+    #     mapper[node] = counter
+    #     counter += 1
+    # print(mapper)
+    # old_edges = induced_graphs_list[0].edges
+    # print("Old", old_edges)
+    # new_edges = []
+    # for edge in old_edges:
+    #     new_edge = (mapper[edge[0]], mapper[edge[1]])
+    #     new_edges.append(new_edge)
+    # print("New", new_edges)
+
+    # new_graph = nx.from_edgelist(new_edges)
+
+def node_degree_func(graph):
+    degree_set = []
+    node_degree = []
+    for node in graph.degree():
+        node_degree.append(node[1])
+    node_degree = sorted(node_degree)
+    if node_degree not in degree_set:
+        degree_set.append(node_degree)
+    return degree_set
+
+def label_map_to_graph(graph):
+    nodes = graph.nodes()
+    edges = graph.edges()
+    new_edges = []
+    mapper = {}
+    counter = 0
+    for node in nodes:
+        mapper[node] = counter 
+        counter += 1
+    for edge in edges:
+        new_edge = (mapper[edge[0]], mapper[edge[1]])
+        new_edges.append(new_edge)
+    return nx.from_edgelist(new_edges)
+    """
+    make a mapping function where we take in the current induced subgraphs nodes and edge list, map the nodes and edge list to new labels like list(range(graph.nodes())), then return edge list. From there, create a new
+    graph like new_graph = nx.from_edge_list(new_fxn) and then compare for isomorphism. 
+
+    e.g.,
+    nodes = [8, 1, 4, 7]
+    edges = [(8, 4), (8, 7), (1, 7)]
+
+    functional transformation magic
+    list = {}
+    map = {}
+    counter = 0
+    for node in nodes:
+        map[node] = counter
+        counter += 1
+    for i in range(len(nodes)):
+        list[nodes[i]].setDefault(nodes[i], []) = new_nodes[i]
+    
+    for edge in edges:
+        
+    new_nodes = [0, 1, 2, 3]
+    new_edges = [(0, 2), (0, 3), (1, 3)]
+    """
+    
+
+    g6_induced_graphs_set = {nx.to_graph6_bytes(i, header=False) for i in induced_graphs_set}
+    g6_four_vertex_graphs = {nx.to_graph6_bytes(i, header=False) for i in four_vertex_graphs}
  
     g6_compare_induced_four_vertex = g6_induced_graphs_set.difference(g6_four_vertex_graphs)
-    for g in g6_compare_induced_four_vertex:
-        draw_graph(nx.from_graph6_bytes(g))
+    #for g in g6_compare_induced_four_vertex:
+        #draw_graph(nx.from_graph6_bytes(g.rstrip()), str(g))
     
 
     # nbunch = get_leaf_nodes(test_graph)
@@ -105,6 +235,19 @@ def draw_partitioned_graphs(graphs, names):
         else:
             draw_graph(out.get(key)[0], key)
 
+def load_all_g6(index):
+    g6_set = set()
+    nodes_and_diameters = [i for i in  range(2 * index + 2)]
+    for nodes in nodes_and_diameters:
+        for diameter in nodes_and_diameters:
+            filename_ends_with = str(nodes) + '.' + str(diameter) + '.' + str(index) + '.g6'
+            directory = os.fsdecode('leaf_files')
+            temp = str(directory) + '\Tree' + str(filename_ends_with)
+            if exists(temp):
+                with open(temp, "r") as file:
+                    for line in file:
+                        g6_set.add(line.rstrip())
+    return g6_set
 
 def load_all_graphs(index=None):
     graphs = set()
