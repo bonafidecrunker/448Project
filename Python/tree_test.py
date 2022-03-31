@@ -9,7 +9,7 @@ from Logic import *
 import pandas as pd
 
 
-def main():  
+def main(index):
     """
     possible degree lists for graphs of four nodes:
     [1,1,2,2] => p4
@@ -26,36 +26,31 @@ def main():
     four_vertex_dict = {}
     induced_graph_dict = {}
 
-    file_path = 'graph_files/std_geng5_c.g6'
+    file_path = 'graph_files/std_geng4_c.g6'
     graphs = nx.read_graph6(file_path)
     for g in graphs:
         four_vertex_graphs.add(g)
         key = node_degree_func(g)
         key2 = '.'.join([str(c) for c in key])
         four_vertex_dict.setdefault(key2, []).append(g)
-    
-    trees = load_all_graphs(5)
-    for tree in trees:
-        nbunch = get_leaf_nodes(tree)
-        temp_graph = nx.power(tree, 5)
-        induced_graph = nx.induced_subgraph(temp_graph, nbunch)
-        if nx.is_connected(induced_graph):  
-            induced_graphs_set.add(induced_graph)
-            key = node_degree_func(induced_graph)
-            key2 = '.'.join([str(c) for c in key])            
-            induced_graph_dict.setdefault(key2, []).append(tree)
 
+    for i in range(2, index + 1):
+        trees = load_all_graphs(index)
+        for tree in trees:
+            nbunch = get_leaf_nodes(tree)
+            temp_graph = nx.power(tree, index)
+            induced_graph = nx.induced_subgraph(temp_graph, nbunch)
+            if nx.is_connected(induced_graph):
+                induced_graphs_set.add(induced_graph)
+                key = node_degree_func(induced_graph)
+                key2 = '.'.join([str(c) for c in key])
+                induced_graph_dict.setdefault(key2, []).append(tree)
 
-    forbidden_dict = {k:v for k,v in four_vertex_dict.items() if k not in induced_graph_dict}
+    forbidden_dict = {k: v for k, v in four_vertex_dict.items() if k not in induced_graph_dict}
     print(forbidden_dict)
-
-    # for v in forbidden_dict.values():
-    #     draw_graphs(v)
-    
 
 
 def node_degree_func(graph):
-    degree_set = []
     node_degree = []
     for node in graph.degree():
         node_degree.append(node[1])
@@ -74,7 +69,7 @@ def get_leaf_nodes(test_graph):
 
 def load_all_graphs(index=None):
     graphs = set()
-    if index != None:
+    if index is not None:
         nodes_and_diameters = [i for i in  range(2 * index + 2)]
         for nodes in nodes_and_diameters:
             for diameter in nodes_and_diameters:
@@ -86,12 +81,11 @@ def load_all_graphs(index=None):
         graphs.update(temp_graphs)
     return graphs
 
+
 def load_graph(file_ends_with='.g6'):
     graphs_set = set()
     directory = os.fsdecode('leaf_files')  
-    temp = str(directory)  + '\Tree' + str(file_ends_with)
-    directory2 = os.fsdecode('leaf_files2')
-    temp2 = str(directory2)  + '\Tree' + str(file_ends_with)
+    temp = str(directory) + '\Tree' + str(file_ends_with)
     if exists(temp):
         graph = nx.read_graph6(temp)
         if type(graph) is list:
@@ -100,15 +94,8 @@ def load_graph(file_ends_with='.g6'):
                 graphs_set.add(temp_graph)
         else:
             graphs_set.add(graph)
-    if exists(temp2):
-        graph = nx.read_graph6(temp2)
-        if type(graph) is list:
-            for g in graph:
-                temp_graph = nx.Graph(g)
-                graphs_set.add(temp_graph)
-        else:
-            graphs_set.add(graph)
     return graphs_set
+
 
 def partition(graphs):
     for g in graphs:
@@ -127,7 +114,7 @@ def build_filename(n, d, l):
     return "Tree"+str(n)+"."+str(d)+"."+str(l)+'.g6'
 
 
-main()
+main(4)
 
 """
 Old code - May still use
