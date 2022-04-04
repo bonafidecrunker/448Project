@@ -33,6 +33,7 @@ def main(index, k_leaf_power):
             if nx.is_connected(induced_graph) and nx.diameter(induced_graph) <= k_leaf_power:
                 key = node_degree_func(induced_graph)
                 key2 = '.'.join([str(c) for c in key])
+                #Check if graph - each node exists within forbidden_dict, if it does not add to induced graph_dict
                 induced_graph_dict.setdefault(key2, []).append(tree)
 
     temp_forbidden_dict = {k: v for k, v in vertex_dict.items() if k not in induced_graph_dict}
@@ -46,6 +47,21 @@ def main(index, k_leaf_power):
     for v in temp_forbidden_dict.values():
         draw_graphs(v)
 
+
+def remove_one_node(graph):
+    """
+    Function to remove each node once and add it to a list
+    :param graph:
+    :return: list of graphs with one node removed
+    """
+    graph_out_list = []
+    node_list = list(graph.nodes)
+    print(node_list)
+    for i in node_list:
+        temp_graph = graph.remove_node(i)
+        graph_out_list.append(temp_graph)
+    print(graph_out_list)
+    return graph_out_list
 
 
 def node_degree_func(graph):
