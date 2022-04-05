@@ -7,7 +7,6 @@ from Logic import *
 def main(index, k_leaf_power):
     # make the list of all graphs smaller if it contains a forbidden induced subgraph
 
-    forbidden_dict = {}
 
     all_graphs_k = {}
     induced_graph_dict = {}
@@ -25,10 +24,15 @@ def main(index, k_leaf_power):
     # for files of name Tree.n.d.l where l is index, takes the k_leaf_power of each graph up to k_leaf_power times and
     # adds it to a set (dictionary) of computed induced graphs
 
+    """
+    1.1.2.3.3 -> Bull
+    1.2.2.3.4 -> Dart
+    2.2.3.3.4 -> Gem
+    """
     trees = load_all_graphs(index)
     #sort trees by number of leaves
     print(len(trees))
-    counter = 0
+#loop starts here - k leaf power loop
     for tree in trees:
         nbunch = get_leaf_nodes(tree)
         temp_graph = nx.power(tree, index)
@@ -39,20 +43,25 @@ def main(index, k_leaf_power):
             induced_graph_dict.setdefault(key2, []).append(tree)
 
     
-    print(induced_graph_dict.keys())
+    #print(induced_graph_dict.keys())
 
-    temp_forbidden_dict = {k: v for k, v in all_graphs_k.items() if k in induced_graph_dict}
+    temp_forbidden_dict = {k: v for k, v in all_graphs_k.items() if k not in induced_graph_dict}
     #print(temp_forbidden_dict.keys())
 
-    for k, v in temp_forbidden_dict.items():
-        forbidden_dict.setdefault(k, []).append(v)
+    for k in temp_forbidden_dict.keys():
+        #check for k_leaf_power - 1 all_forbidden_dict : if true - add here
+        all_forbidden_dict.setdefault(k_leaf_power, []).append(k)
+        #false add here
+        #add to another dict all_minimal_forbidden
 
-    #print(forbidden_dict)
-    #for v in temp_forbidden_dict.values():
-        #draw_graphs(v)
+#loop ends here
+    print(all_forbidden_dict)
+
 
 
 def remove_one_node(graph):
+    #TODO
+    #Fix
     """
     Function to remove each node once and add it to a list
     :param graph:
@@ -166,8 +175,8 @@ def build_filename(nodes, diameter, leaves):
     return f"Tree{nodes}.{diameter}.{leaves}.g6"
 
 
-index = 5
-k_leaf_power = 3
+index = 4
+k_leaf_power = 2
 main(index, k_leaf_power)
 
 
