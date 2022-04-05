@@ -11,6 +11,7 @@ def main(index, k_leaf_power):
 
     all_graphs_k = {}
     induced_graph_dict = {}
+    all_forbidden_dict = {}
 
 
     # loads in all graphs of node number index
@@ -23,39 +24,32 @@ def main(index, k_leaf_power):
 
     # for files of name Tree.n.d.l where l is index, takes the k_leaf_power of each graph up to k_leaf_power times and
     # adds it to a set (dictionary) of computed induced graphs
-    for i in range(2, index + 1):
-        trees = load_all_graphs(index)
-        for tree in trees:
-            nbunch = get_leaf_nodes(tree)
-            temp_graph = nx.power(tree, i)
-            induced_graph = nx.induced_subgraph(temp_graph, nbunch)
-            if nx.is_connected(induced_graph) and nx.diameter(induced_graph) <= k_leaf_power:
-                key = node_degree_func(induced_graph)
-                key2 = '.'.join([str(c) for c in key])                
-                if key2 == '1.1.2.3.3' or key2 == '1.2.2.3.4' or key2 == '2.2.3.3.4':
-                    if key2 == '1.1.2.3.3':
-                        print("Bull not allowed")
-                    elif key2 == '1.2.2.3.4':
-                        print("Gem not allowed")
-                    elif key2 == '2.2.3.3.4':
-                        print('Dart not allowed')
-                    print(f'{key2} is not allowed')  
-                    draw_graph(induced_graph)  
-                    draw_graph(tree, i, isTree=True)                  
-                    
-                #Check if graph - each node exists within forbidden_dict, if it does not add to induced graph_dict
-                induced_graph_dict.setdefault(key2, []).append(tree)
 
-    temp_forbidden_dict = {k: v for k, v in all_graphs_k.items() if k not in induced_graph_dict}
-    for value in temp_forbidden_dict.values():
-        print(temp_forbidden_dict.keys())
+    trees = load_all_graphs(index)
+    #sort trees by number of leaves
+    print(len(trees))
+    counter = 0
+    for tree in trees:
+        nbunch = get_leaf_nodes(tree)
+        temp_graph = nx.power(tree, index)
+        induced_graph = nx.induced_subgraph(temp_graph, nbunch)
+        if nx.is_connected(induced_graph):
+            key = node_degree_func(induced_graph)
+            key2 = '.'.join([str(c) for c in key])    
+            induced_graph_dict.setdefault(key2, []).append(tree)
+
+    
+    print(induced_graph_dict.keys())
+
+    temp_forbidden_dict = {k: v for k, v in all_graphs_k.items() if k in induced_graph_dict}
+    #print(temp_forbidden_dict.keys())
 
     for k, v in temp_forbidden_dict.items():
         forbidden_dict.setdefault(k, []).append(v)
 
-    print(forbidden_dict)
-    for v in temp_forbidden_dict.values():
-        draw_graphs(v)
+    #print(forbidden_dict)
+    #for v in temp_forbidden_dict.values():
+        #draw_graphs(v)
 
 
 def remove_one_node(graph):
@@ -111,12 +105,13 @@ def load_all_graphs(index=None):
     """
     graphs = set()
     if index is not None:
-        nodes_and_diameters = [i for i in range(16)]  # only considering graphs and trees up to 15 nodes for now
-        for nodes in nodes_and_diameters:
-            for diameter in nodes_and_diameters:
-                filename_ends_with = str(nodes) + '.' + str(diameter) + '.' + str(index) + '.g6'
-                temp_graphs = load_all_graphs_helper(filename_ends_with)
-                graphs.update(temp_graphs)
+        for i in range(3, index +  1):
+            nodes_and_diameters = [i for i in range(16)]  # only considering graphs and trees up to 15 nodes for now
+            for nodes in nodes_and_diameters:
+                for diameter in nodes_and_diameters:
+                    filename_ends_with = str(nodes) + '.' + str(diameter) + '.' + str(i) + '.g6'
+                    temp_graphs = load_all_graphs_helper(filename_ends_with)
+                    graphs.update(temp_graphs)
     else:
         temp_graphs = load_all_graphs_helper()
         graphs.update(temp_graphs)
@@ -172,7 +167,7 @@ def build_filename(nodes, diameter, leaves):
 
 
 index = 5
-k_leaf_power = 6
+k_leaf_power = 3
 main(index, k_leaf_power)
 
 
