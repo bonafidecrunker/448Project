@@ -9,8 +9,9 @@ def main(index, k_leaf_power):
 
     forbidden_dict = {}
 
-    vertex_dict = {}
+    all_graphs_k = {}
     induced_graph_dict = {}
+
 
     # loads in all graphs of node number index
     file_path = f'graph_files/std_geng{index}_c.g6'
@@ -18,9 +19,7 @@ def main(index, k_leaf_power):
     for g in graphs:
         key = node_degree_func(g)
         key2 = '.'.join([str(c) for c in key])
-        vertex_dict.setdefault(key2, []).append(g)
-        if key2 == '1.1.2.3.3' or key2 == '1.2.2.3.4' or key2 == '2.2.3.3.4':
-            print(f'{key2} is not allowed')
+        all_graphs_k.setdefault(key2, []).append(g)
 
     # for files of name Tree.n.d.l where l is index, takes the k_leaf_power of each graph up to k_leaf_power times and
     # adds it to a set (dictionary) of computed induced graphs
@@ -32,11 +31,22 @@ def main(index, k_leaf_power):
             induced_graph = nx.induced_subgraph(temp_graph, nbunch)
             if nx.is_connected(induced_graph) and nx.diameter(induced_graph) <= k_leaf_power:
                 key = node_degree_func(induced_graph)
-                key2 = '.'.join([str(c) for c in key])
+                key2 = '.'.join([str(c) for c in key])                
+                if key2 == '1.1.2.3.3' or key2 == '1.2.2.3.4' or key2 == '2.2.3.3.4':
+                    if key2 == '1.1.2.3.3':
+                        print("Bull not allowed")
+                    elif key2 == '1.2.2.3.4':
+                        print("Gem not allowed")
+                    elif key2 == '2.2.3.3.4':
+                        print('Dart not allowed')
+                    print(f'{key2} is not allowed')  
+                    draw_graph(induced_graph)  
+                    draw_graph(tree, i, isTree=True)                  
+                    
                 #Check if graph - each node exists within forbidden_dict, if it does not add to induced graph_dict
                 induced_graph_dict.setdefault(key2, []).append(tree)
 
-    temp_forbidden_dict = {k: v for k, v in vertex_dict.items() if k not in induced_graph_dict}
+    temp_forbidden_dict = {k: v for k, v in all_graphs_k.items() if k not in induced_graph_dict}
     for value in temp_forbidden_dict.values():
         print(temp_forbidden_dict.keys())
 
