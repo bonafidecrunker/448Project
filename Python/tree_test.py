@@ -7,68 +7,69 @@ from Logic import *
 
 def main(k_leaf_power):
     # make the list of all graphs smaller if it contains a forbidden induced subgraph
-    all_graphs = {}
-
+    all_graphs_k = {}
     all_forbidden_dict = {}
     minimal_forbidden_dict = {}
-
     trees = load_all_graphs()
-
-    # loads all chosen graphs of input size 4 - whatever into all_graphs
-    for graph_size in range(5, 6):
-        file_path = f'graph_files/std_geng{graph_size}_c.g6'
-        # loads in all graphs of node number index
-
+    # loads in all graphs of node number index
+    for i in range(4, index + 1):
+        file_path = f'graph_files/std_geng{i}_c.g6'
         graphs = nx.read_graph6(file_path)
         for g in graphs:
-            key = build_graph_key(g)
-            all_graphs.setdefault(key, []).append(g)
-
-        # for files of name Tree.n.d.l where l is index, takes the k_leaf_power of each graph up to k_leaf_power times and
-        # adds it to a set (dictionary) of computed induced graphs
-
-        """
-        1.1.2.3.3 -> Bull
-        1.2.2.3.4 -> Dart
-        2.2.3.3.4 -> Gem
-        """
-    # for k,v in all_graphs.items():
-    #     if len(v) == 2:
-    #         draw_graphs(v, k)
+            key = node_degree_func(g)
+            key2 = '.'.join([str(c) for c in key])
+            all_graphs_k.setdefault(key2, []).append(g)
+    induced_graph_dict = {}
 
 
-    # sort trees by number of leaves
-    trees_sorted = sorted(trees, key=lambda x: get_leaf_nodes(x))
+    # """
+    # 1.1.2.3.3 -> Bull
+    # 1.2.2.3.4 -> Dart
+    # 2.2.3.3.4 -> Gem
+    # """
+
     # loop starts here - k leaf power loop
-    for power in range(2, k_leaf_power + 1):
-        induced_graph_dict = {}
-        for tree in trees_sorted:
-            nbunch = get_leaf_nodes(tree)
-            temp_graph = nx.power(tree, power)
-            induced_graph = nx.induced_subgraph(temp_graph, nbunch)
-            if nx.is_connected(induced_graph):
-                key = build_graph_key(induced_graph)
-                induced_graph_dict.setdefault(key, []).append(tree)
+    
+    
+    
+    for tree in trees:
+        nbunch = get_leaf_nodes(tree)
+        temp_graph = nx.power(tree, k_leaf_power)
+        induced_graph = nx.induced_subgraph(temp_graph, nbunch)     
+        key = build_graph_key(induced_graph)
+        if key == '1.1.1.3':
+            print(f"missing {key}")
+        if nx.is_connected(induced_graph):
+            induced_graph_dict.setdefault(key, []).append(tree)
 
-        # set like operation to build a dictionary containing the difference all_graphs - induced_graphs
-        temp_forbidden_dict = {k: v for k, v in all_graphs.items() if k not in induced_graph_dict}
-        print('Induced', induced_graph_dict.keys())
-        for k in temp_forbidden_dict.keys():
-            # check for k_leaf_power - 1 all_forbidden_dict : if true - add here
-            if contains_known_forbidden_subgraph(minimal_forbidden_dict, k, power - 1):
-                all_forbidden_dict.setdefault(power, []).append(k)
-            # false add here
-            else:
-                minimal_forbidden_dict.setdefault(power, []).append(k)
-            # add to another dict all_minimal_forbidden
+
+
+# set like operation to build a dictionary containing the difference all_graphs - induced_graphs
+    temp_forbidden_dict = {k: v for k, v in all_graphs_k.items() if k not in induced_graph_dict}
+    #print(induced_graph_dict)
+    print('temp forb', temp_forbidden_dict.keys())
+    for k, v in temp_forbidden_dict.items():
+        # check for k_leaf_power - 1 all_forbidden_dict : if true - add here
+    
+
+
+        if contains_known_forbidden_subgraph(minimal_forbidden_dict, v, k_leaf_power - 1):
+           all_forbidden_dict.setdefault(k_leaf_power, []).append(k)
+        # false add here
+        else:
+           minimal_forbidden_dict.setdefault(k_leaf_power, []).append(k)
+        # add to another dict all_minimal_forbidden
+    
+    #print('internal minimal' , minimal_forbidden_dict)
 
     # loop ends here
-    print('All forbiddens', all_forbidden_dict)
-    # square = nx.from_edgelist([(0, 1), (1, 2), (2, 3), (3, 0)])
-    print('Minimals', minimal_forbidden_dict)
+    print('forbidden', all_forbidden_dict)
+
+    square = nx.from_edgelist([(0, 1), (1, 2), (2, 3), (3, 0)])
+    print('minimal', minimal_forbidden_dict)
 
 
-def contains_known_forbidden_subgraph(all_forbidden_dict, graphs, index):
+def contains_known_forbidden_subgraph(dict_in, graphs, index):
     """
     Function to check if a subgraph of each graph in graphs is contained in the list of known minimal forbidden
     induced subgraphs for k-leaf powers.
@@ -77,16 +78,29 @@ def contains_known_forbidden_subgraph(all_forbidden_dict, graphs, index):
     :param graphs: list of graphs over which to compare to graphs in all_forbidden_dict
     :return: True if graph is found, False otherwise
     """
+    bool_arr = []
 
     # if all_forbidden_dict is empty, it cannot contain a forbidden subgraph
-    if not bool(all_forbidden_dict):
+    if not bool(dict_in):
         return False
-
     for graph in graphs:
-        if index in all_forbidden_dict.keys():
-            if build_graph_key(graph) in all_forbidden_dict[index - 1]:
-                return True
-    return False
+        if  index in dict_in.keys():
+            temp_key = build_graph_key(graph)
+            for v in dict_in.get(index):
+                if type(v) == list:
+                    for v_i in v:
+                        temp_v = build_graph_key(v_i)
+                        if temp_key == temp_v:  
+                            bool_arr.append(True)
+                        else:
+                             bool_arr.append(False)
+                else:
+                    if temp_key == v:
+                         bool_arr.append(True)
+                    else:
+                         bool_arr.append(False)
+                         
+    return bool_arr
 
 
 def remove_one_node(graph):
@@ -204,11 +218,11 @@ def build_filename(nodes, diameter, leaves):
 
 
 def build_graph_key(graph):
-    return '.'.join([str(c) for c in node_degree_func(graph)]) if type(graph) != str else graph
+    return '.'.join([str(c) for c in node_degree_func(graph)])
 
 
 k_leaf_power = 2
-main(k_leaf_power)
+#main(index, k_leaf_power)
 
 
 """
