@@ -218,6 +218,17 @@ k_leaf_power = 6
 main(k_leaf_power)
 
 
+class G6_NX_Graphs:
+    def __init__(self, g6_string, nx_graph):
+        self.g6_string = g6_string
+        self.nx_graph = nx_graph
+
+    def get_g6_string(self):
+        return self.g6_string
+
+    def get_nx_graph(self):
+        return self.nx_graph
+
 
 """
 Old code - May still use
