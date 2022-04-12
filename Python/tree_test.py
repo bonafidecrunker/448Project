@@ -3,69 +3,66 @@ from os.path import exists
 import networkx as nx
 from Graph_Draw import *
 from Logic import *
+import pynauty as pn
 
 
 def main(k_leaf_power):
     # make the list of all graphs smaller if it contains a forbidden induced subgraph
     all_graphs = {}
-
     all_forbidden_dict = {}
     minimal_forbidden_dict = {}
-
     trees = load_all_graphs()
+    pn_graphs = []
+    induced_subgraphs_pn = []
 
     # loads all chosen graphs of input size 4 - whatever into all_graphs
-    for graph_size in range(5, 6):
+    for graph_size in range(4, 5):
         file_path = f'graph_files/std_geng{graph_size}_c.g6'
         # loads in all graphs of node number index
 
         graphs = nx.read_graph6(file_path)
+
         for g in graphs:
             key = build_graph_key(g)
             all_graphs.setdefault(key, []).append(g)
+            g2 = networkx_to_pynauty(g)
+            pn_graphs.append(g2)
 
-        # for files of name Tree.n.d.l where l is index, takes the k_leaf_power of each graph up to k_leaf_power times and
-        # adds it to a set (dictionary) of computed induced graphs
-
-        """
-        1.1.2.3.3 -> Bull
-        1.2.2.3.4 -> Dart
-        2.2.3.3.4 -> Gem
-        """
-    # for k,v in all_graphs.items():
-    #     if len(v) == 2:
-    #         draw_graphs(v, k)
-
-
-    # sort trees by number of leaves
-    trees_sorted = sorted(trees, key=lambda x: get_leaf_nodes(x))
-    # loop starts here - k leaf power loop
-    for power in range(2, k_leaf_power + 1):
-        induced_graph_dict = {}
-        for tree in trees_sorted:
+    for power in range(3, k_leaf_power + 1):
+        # induced_graph_dict = {}
+        for tree in trees:
             nbunch = get_leaf_nodes(tree)
             temp_graph = nx.power(tree, power)
             induced_graph = nx.induced_subgraph(temp_graph, nbunch)
             if nx.is_connected(induced_graph):
+                png = networkx_to_pynauty(induced_graph)
+                induced_subgraphs_pn.append(png)
                 key = build_graph_key(induced_graph)
-                induced_graph_dict.setdefault(key, []).append(tree)
-
-        # set like operation to build a dictionary containing the difference all_graphs - induced_graphs
-        temp_forbidden_dict = {k: v for k, v in all_graphs.items() if k not in induced_graph_dict}
-        print('Induced', induced_graph_dict.keys())
-        for k in temp_forbidden_dict.keys():
-            # check for k_leaf_power - 1 all_forbidden_dict : if true - add here
-            if contains_known_forbidden_subgraph(minimal_forbidden_dict, k, power - 1):
-                all_forbidden_dict.setdefault(power, []).append(k)
-            # false add here
-            else:
-                minimal_forbidden_dict.setdefault(power, []).append(k)
-            # add to another dict all_minimal_forbidden
-
-    # loop ends here
-    print('All forbiddens', all_forbidden_dict)
-    # square = nx.from_edgelist([(0, 1), (1, 2), (2, 3), (3, 0)])
-    print('Minimals', minimal_forbidden_dict)
+                # induced_graph_dict.setdefault(key, []).append(tree)
+    pn.canon_label()
+    print(pn_graphs)
+    pn_forbiddens = induced_subgraphs_pn.copy()
+    print(pn_forbiddens)
+    for g1 in pn_graphs:
+        for g2 in induced_subgraphs_pn:
+            if not pn.isomorphic(g1, g2):
+                pn_forbiddens.remove(g1)
+    print(pn_forbiddens)
+    #     # set like operation to build a dictionary containing the difference all_graphs - induced_graphs
+    #     temp_forbidden_dict = {k: v for k, v in all_graphs.items() if k not in induced_graph_dict}
+    #     print('Induced', induced_graph_dict.keys())
+    #     for k in temp_forbidden_dict.keys():
+    #         # check for k_leaf_power - 1 all_forbidden_dict : if true - add here
+    #         if contains_known_forbidden_subgraph(minimal_forbidden_dict, k, power - 1):
+    #             all_forbidden_dict.setdefault(power, []).append(k)
+    #         # false add here
+    #         else:
+    #             minimal_forbidden_dict.setdefault(power, []).append(k)
+    #         # add to another dict all_minimal_forbidden
+    #
+    # # loop ends here
+    # print('All forbiddens', all_forbidden_dict)
+    # print('Minimals', minimal_forbidden_dict)
 
 
 def contains_known_forbidden_subgraph(all_forbidden_dict, graphs, index):
@@ -136,7 +133,6 @@ def get_leaf_nodes(graph):
 def load_all_graphs(index=15):
     """
     Loads all graphs of given diameter index for all trees. Returns a set networkx graphs.
-
     :param index: diameter of the tree for which to load tree files
     :return: set of networkx graphs
     """
@@ -158,13 +154,12 @@ def load_all_graphs(index=15):
 def load_all_graphs_helper(file_ends_with='.g6'):
     """
     Given a file containing some numbers of graphs (>= 1), load those graphs into a set.
-
     :param file_ends_with:
     :return: a set of graphs from the g6 file
     """
     graphs_set = set()
-    directory = os.fsdecode('leaf_files')  
-    temp = str(directory) + '\Tree' + str(file_ends_with)
+    directory = os.fsdecode('leaf_files')
+    temp = str(directory) + '/Tree' + str(file_ends_with)
     if exists(temp):
         graph = nx.read_graph6(temp)
 
@@ -199,20 +194,37 @@ def partition(graphs):
             f.write(nx.to_graph6_bytes(g).decode("utf-8").replace(">>graph6<<", ""))
 
 
+def networkx_to_pynauty(graph):
+    num_nodes = len(graph.nodes())
+    edges = nx.to_dict_of_lists(label_map_to_graph(graph))
+    pn_graph = pn.Graph(num_nodes, edges)
+    return pn_graph
+
+
+def pynauty_to_networkx(pn_graph):
+    adj_dict = pn_graph._get_adjacency_dictionary()
+    nx_graph = nx.from_dict_of_dicts(adj_dict)
+    return nx_graph
+
+
+def subgraph_exists(test_graph, forbidden_tuple):
+    nodes = test_graph.nodes()
+    forbidden_graph = forbidden_tuple[1]
+    canonized_subgraphs = []
+    forbidden_tuple_len = len(forbidden_graph.nodes())
+    if len(nodes) >= forbidden_tuple_len:
+        return
+    combinations = list(itertools.combinations(nodes, forbidden_tuple_len))
+    for c in combinations:
+        G = test_graph.subgraph(c).copy()
+        pn_graph = pn.canon_label(networkx_to_pynauty(G))
+        temp_graph = pynauty_to_networkx(pn_graph)
+        return nx.to_graph6_bytes(temp_graph, header=False).strip() == forbidden_tuple[0]
+
+
 def build_filename(nodes, diameter, leaves):
     return f"Tree{nodes}.{diameter}.{leaves}.g6"
 
-
-def build_graph_key(graph):
-    return '.'.join([str(c) for c in node_degree_func(graph)]) if type(graph) != str else graph
-
-
-k_leaf_power = 2
-main(k_leaf_power)
-
-
-"""
-Old code - May still use
 
 def label_map_to_graph(graph):
     nodes = graph.nodes()
@@ -221,12 +233,26 @@ def label_map_to_graph(graph):
     mapper = {}
     counter = 0
     for node in nodes:
-        mapper[node] = counter 
+        mapper[node] = counter
         counter += 1
     for edge in edges:
         new_edge = (mapper[edge[0]], mapper[edge[1]])
         new_edges.append(new_edge)
     return nx.from_edgelist(new_edges)
+
+
+def build_graph_key(graph):
+    return '.'.join([str(c) for c in node_degree_func(graph)]) if type(graph) != str else graph
+
+
+k_leaf_power = 3
+main(k_leaf_power)
+
+
+"""
+Old code - May still use
+
+
 
 
 

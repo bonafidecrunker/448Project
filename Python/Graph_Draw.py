@@ -36,6 +36,7 @@ def draw_graphs(g, title=None):
     plt.tight_layout()
     plt.show()
 
+
 def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5):
     """
     Reference: https://stackoverflow.com/questions/29586520/can-one-get-hierarchical-graphs-from-networkx-with-python-3/29597209#29597209
@@ -50,14 +51,6 @@ def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter 
             root = random.choice(list(G.nodes))
 
     def _hierarchy_pos(G, root, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5, pos = None, parent = None):
-        '''
-        see hierarchy_pos docstring for most arguments
-
-        pos: a dict saying where all nodes go if they have been assigned
-        parent: parent of this branch. - only affects it if non-directed
-
-        '''
-    
         if pos is None:
             pos = {root:(xcenter,vert_loc)}
         else:
@@ -75,5 +68,4 @@ def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter 
                                     pos=pos, parent = root)
         return pos
 
-            
     return _hierarchy_pos(G, root, width, vert_gap, vert_loc, xcenter)
