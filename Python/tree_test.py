@@ -1,8 +1,8 @@
 import os
 from os.path import exists
 import networkx as nx
-from Graph_Draw import *
 from Logic import *
+from Graph_Draw import *
 
 
 def main(k_leaf_power):
@@ -11,14 +11,11 @@ def main(k_leaf_power):
     all_graphs_g6 = set()
     all_canonized_induced_subgraphs = []
     all_canonized_induced_subgraphs_g6 = set()
-    all_canonized_dict = {}
     all_forbidden_dict = {}
     minimal_forbidden_dict = {}
 
-    trees = load_all_graphs()
-
     # loads all chosen graphs of input size 4 - whatever into all_graphs
-    for graph_size in range(4, 5):
+    for graph_size in range(4, 6):
         file_path = f'labeled_graphs/std_geng{graph_size}_cl.g6'
         # loads in all graphs of node number index
 
@@ -38,10 +35,20 @@ def main(k_leaf_power):
     for j in range(len(all_canonized_induced_subgraphs)):
         all_canonized_induced_subgraphs_g6.add(all_canonized_induced_subgraphs[j][0])
 
-    print(f'All graphs: {len(all_graphs_g6)}\nAll canonized induced subgraphs: {len(all_canonized_induced_subgraphs_g6)}')
-    difference = all_canonized_induced_subgraphs_g6 - all_graphs_g6
-    print(f'Length difference: {len(difference)}\n{difference}')
-    #
+    four_node_induced = set()
+    for pair in all_canonized_induced_subgraphs:
+        if len(pair[1].nodes) == 4:
+            four_node_induced.add(pair[0])
+
+    all_forbiddens = all_graphs_g6 - four_node_induced
+    # print(all_forbiddens)
+    min_forbiddens = set()
+
+    for f_graph in all_forbiddens:
+        if not subgraph_exists(f_graph, min_forbiddens):
+            min_forbiddens.add(f_graph)
+
+    print(min_forbiddens)
     # # loop starts here - k leaf power loop
     # for power in range(3, k_leaf_power + 1):
     #     print(f'{power} leaf powers\n')
@@ -212,6 +219,23 @@ def label_map_to_graph(graph):
         new_edge = (mapper[edge[0]], mapper[edge[1]])
         new_edges.append(new_edge)
     return nx.from_edgelist(new_edges)
+
+
+def subgraph_exists(test_string, min_forbidden):
+    temp_graph = nx.from_graph6_bytes(test_string.encode("utf-8"))
+    if not min_forbidden:
+        return False
+    for min_f in min_forbidden:
+        temp_forbidden_graph = nx.from_graph6_bytes(min_f.encode("utf-8"))
+        temp_forb_len = len(temp_forbidden_graph.nodes())
+        if temp_forb_len < len(temp_graph.nodes()):
+            combinations = list(itertools.combinations(temp_graph.nodes(), temp_forb_len))
+            for c in combinations:
+                g = temp_graph.subgraph(c).copy()
+                if nx.is_isomorphic(temp_forbidden_graph, g):
+                    draw_graph(temp_forbidden_graph)
+                    return True
+    return False
 
 
 k_leaf_power = 6
