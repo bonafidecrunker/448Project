@@ -14,7 +14,6 @@ def main(k_leaf_power):
     all_canonized_induced_subgraphs_g6 = set()
     all_forbiddens = set()
     
-    min_forbiddens = set()
     minimal_forbidden_dict = {}
 
 
@@ -42,11 +41,12 @@ def main(k_leaf_power):
         four_node_induced = set()
         for pair in all_canonized_induced_subgraphs:
             four_node_induced.add(pair[0])
-
         all_forbiddens = all_graphs_g6 - four_node_induced
         # print(all_forbiddens)
         
         all_forbiddens_list = sorted(all_forbiddens, key=lambda x: len(x))
+        
+        min_forbiddens = set()
         #Keeping track of new minimal forbiddens based on k leaf power
         temp_min_forbiddens = min_forbiddens
 
