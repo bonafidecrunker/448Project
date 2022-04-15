@@ -32,7 +32,7 @@ def draw_graphs(g, title=None, subtitles=None):
     for k in range(total):
         ax = fig.add_subplot(rows, cols, position[k])
         ax.set_title(subtitles[k] if subtitles is not None else f'G{k + 1}')
-        nx.draw(g[k], with_labels='True', font_color='#bab0ac', node_color='#4e79a7')
+        nx.draw_networkx(g[k], with_labels='True', font_color='#bab0ac', node_color='#4e79a7')
     plt.tight_layout()
     plt.show()
 

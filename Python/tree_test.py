@@ -12,13 +12,12 @@ def main(k_leaf_power):
     all_graphs_g6 = set()
     all_canonized_induced_subgraphs = []
     all_canonized_induced_subgraphs_g6 = set()
-    all_forbiddens = set()
     
     minimal_forbidden_dict = {}
 
 
     # loads all chosen graphs of input size 4 - whatever into all_graphs
-    for graph_size in range(4, 7):
+    for graph_size in range(4, 9):
         file_path = f'labeled_graphs/std_geng{graph_size}_cl.g6'
         # loads in all graphs of node number index
 
@@ -38,29 +37,34 @@ def main(k_leaf_power):
         for j in range(len(all_canonized_induced_subgraphs)):
             all_canonized_induced_subgraphs_g6.add(all_canonized_induced_subgraphs[j][0])
 
-        four_node_induced = set()
+        k_node_induced = set()
         for pair in all_canonized_induced_subgraphs:
-            four_node_induced.add(pair[0])
-        all_forbiddens = all_graphs_g6 - four_node_induced
+            k_node_induced.add(pair[0])
+        all_forbiddens = all_graphs_g6 - k_node_induced
         # print(all_forbiddens)
         
         all_forbiddens_list = sorted(all_forbiddens, key=lambda x: len(x))
         
         min_forbiddens = set()
-        #Keeping track of new minimal forbiddens based on k leaf power
-        temp_min_forbiddens = min_forbiddens
-
+        
         for f_graph in all_forbiddens_list:
             if not graph_contains(f_graph, min_forbiddens):
                 min_forbiddens.add(f_graph)
 
-        
-
+    
         minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
 
-    for k,v in minimal_forbidden_dict.items():
-        draw_graphs(v, f'{k}-leaf power minimal forbiddens')
-    #print(len(min_forbiddens))
+    while True:
+        for k,v in minimal_forbidden_dict.items():
+            counter = 0
+            if len(v) > 12:
+                for i in range(len(v)//12 + 1):
+                    temp_v = v[counter: counter + 12]
+                    draw_graphs(temp_v, f'{k}-leaf power minimal forbiddens pg. {(counter/12)}', subtitles=[build_graph_key(x) for x in temp_v])
+                    counter += 12
+            else:
+                draw_graphs(v, f'{k}-leaf power minimal forbiddens', subtitles=[build_graph_key(x) for x in v])
+        #print(len(min_forbiddens))
         
 
 
