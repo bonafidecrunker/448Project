@@ -1,8 +1,10 @@
 import os
 from os.path import exists
-import networkx as nx
 from Logic import *
 from Graph_Draw import *
+
+
+k_leaf_power = 4
 
 
 def main(k_leaf_power):
@@ -14,8 +16,9 @@ def main(k_leaf_power):
     all_forbidden_dict = {}
     minimal_forbidden_dict = {}
 
+
     # loads all chosen graphs of input size 4 - whatever into all_graphs
-    for graph_size in range(4, 6):
+    for graph_size in range(4, 7):
         file_path = f'labeled_graphs/std_geng{graph_size}_cl.g6'
         # loads in all graphs of node number index
 
@@ -28,8 +31,8 @@ def main(k_leaf_power):
     for i in range(len(all_graphs)):
         all_graphs_g6.add(all_graphs[i][0])
 
-    for graph_size in range(3, 4):
-        file_path = f'induced_subgraphs/{graph_size}_leaf_power_canonized.g6'
+    for graph_size in range(3, 5):
+        file_path = f'induced_subgraphs/{k_leaf_power}_leaf_power_canonized.g6'
         get_byte_strings(file_path, all_canonized_induced_subgraphs)
 
     for j in range(len(all_canonized_induced_subgraphs)):
@@ -37,27 +40,33 @@ def main(k_leaf_power):
 
     four_node_induced = set()
     for pair in all_canonized_induced_subgraphs:
-        if len(pair[1].nodes) == 4:
-            four_node_induced.add(pair[0])
+        four_node_induced.add(pair[0])
 
     all_forbiddens = all_graphs_g6 - four_node_induced
     # print(all_forbiddens)
     min_forbiddens = set()
+    all_forbiddens = sorted(all_forbiddens, key=lambda x: len(x))
 
     for f_graph in all_forbiddens:
-        if not subgraph_exists(f_graph, min_forbiddens):
-            min_forbiddens.add(f_graph)
+        if not graph_contains(f_graph, min_forbiddens):
+            if not nx.is_tree(nx.from_graph6_bytes(f_graph.encode('utf-8'))):
+                min_forbiddens.add(f_graph)
 
-    print(min_forbiddens)
+    print(len(min_forbiddens))
+    min_forbiddens_g = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
+    draw_graphs(min_forbiddens_g, '4-leaf powers minimal forbiddens')
+
+
+    # trees = load_all_graphs(20)
     # # loop starts here - k leaf power loop
-    # for power in range(3, k_leaf_power + 1):
+    # for power in range(6, k_leaf_power + 1):
     #     print(f'{power} leaf powers\n')
     #     for tree in trees:
     #         nbunch = get_leaf_nodes(tree)
     #         temp_graph = nx.power(tree, power)
     #         induced_graph = nx.induced_subgraph(temp_graph, nbunch)
-    #         # if nx.is_connected(induced_graph):
-    #         #     nx.write_graph6(induced_graph, f'{power}_leaf_power_induced_subgraphs.g6', header=False)
+    #         if nx.is_connected(induced_graph):
+    #             nx.write_graph6(induced_graph, f'induced_subgraphs\\{power}_leaf_power_induced_subgraphs.g6', header=False)
 
 
 def get_byte_strings(filename, graph_set):
@@ -147,10 +156,9 @@ def load_all_graphs(index=15):
     for i in range(4, index + 1):
         nodes_and_diameters = [i for i in range(index + 1)]  # default value is 15 but can be higher if we want
         for nodes in nodes_and_diameters:
-            for diameter in nodes_and_diameters:
-                filename_ends_with = str(nodes) + '.' + str(diameter) + '.' + str(i) + '.g6'
-                temp_graphs = load_all_graphs_helper(filename_ends_with)
-                graphs.update(temp_graphs)
+            filename_ends_with = str(nodes) + '.' + str(i) + '.g6'
+            temp_graphs = load_all_graphs_helper(filename_ends_with)
+            graphs.update(temp_graphs)
     return graphs
 
 
@@ -162,7 +170,7 @@ def load_all_graphs_helper(file_ends_with='.g6'):
     :return: a set of graphs from the g6 file
     """
     graphs_set = set()
-    directory = os.fsdecode('leaf_files')  
+    directory = os.fsdecode('partitioned_trees')
     temp = '{0}\\Tree{1}'.format(str(directory), str(file_ends_with))
     if exists(temp):
         graph = nx.read_graph6(temp)
@@ -179,8 +187,8 @@ def load_all_graphs_helper(file_ends_with='.g6'):
 
 def partition(graphs):
     """
-    Takes in a list of tree files and partitions the graphs in the files into files that contain only trees of the
-    specified number of nodes (n), diameter (d), and leaves (l). As trees of n.d.l are found, they are appended to the
+    Takes in a list of graphs and partitions the graphs in the files into files that contain only trees of the
+    specified number of nodes (n), and leaves (l). As trees of n.l are found, they are appended to the
     output file rather than overwritten. Additionally, the trees are specifically added as g6 bytes for ease of reading
     and comparison down the line.
 
@@ -188,18 +196,18 @@ def partition(graphs):
     """
     for g in graphs:
         nodes = len(g.nodes)
-        diameter = nx.diameter(g)
         leaves = 0
         for node in g.degree():
             if node[1] == 1:
                 leaves += 1
-        filename = build_filename(nodes, diameter, leaves)
-        with open("leaf_files2/" + filename, "a+") as f:
-            f.write(nx.to_graph6_bytes(g).decode("utf-8").replace(">>graph6<<", ""))
+        if leaves > 3:
+            filename = build_filename(nodes, leaves)
+            with open("partitioned_trees/" + filename, "a+") as f:
+                f.write(nx.to_graph6_bytes(g).decode("utf-8").replace(">>graph6<<", ""))
 
 
-def build_filename(nodes, diameter, leaves):
-    return f"Tree{nodes}.{diameter}.{leaves}.g6"
+def build_filename(nodes, leaves):
+    return f"Tree{nodes}.{leaves}.g6"
 
 
 def build_graph_key(graph):
@@ -221,24 +229,43 @@ def label_map_to_graph(graph):
     return nx.from_edgelist(new_edges)
 
 
-def subgraph_exists(test_string, min_forbidden):
-    temp_graph = nx.from_graph6_bytes(test_string.encode("utf-8"))
+def graph_contains(test_string, min_forbidden):
+    # if min_forbidden is empty, there can be no extant subgraph in it
     if not min_forbidden:
         return False
+
+    temp_graph = nx.from_graph6_bytes(test_string.encode("utf-8"))
     for min_f in min_forbidden:
         temp_forbidden_graph = nx.from_graph6_bytes(min_f.encode("utf-8"))
-        temp_forb_len = len(temp_forbidden_graph.nodes())
-        if temp_forb_len < len(temp_graph.nodes()):
-            combinations = list(itertools.combinations(temp_graph.nodes(), temp_forb_len))
-            for c in combinations:
-                g = temp_graph.subgraph(c).copy()
-                if nx.is_isomorphic(temp_forbidden_graph, g):
-                    draw_graph(temp_forbidden_graph)
-                    return True
+        temp_forbidden_size = len(temp_forbidden_graph.nodes())
+        combinations = list(itertools.combinations(temp_graph.nodes(), temp_forbidden_size))
+        for c in combinations:
+            g = temp_graph.subgraph(c).copy()
+            if nx.is_isomorphic(temp_forbidden_graph, g):
+                return True
     return False
 
 
-k_leaf_power = 6
+def load_g6_leaf2():
+    # Loads and returns all graphs in all files as a single list
+    directory = os.fsencode('tree_files')
+    graphs = []
+    # out = []
+    for file in os.listdir(directory):
+        filename = os.fsencode(file)
+        path_string = str(directory.decode('utf-8')) + "\\" + str(filename.decode('utf-8'))
+        graph = nx.read_sparse6(path_string)
+        if type(graph) is list:
+            for g in graph:
+                temp = nx.Graph(g)
+                graphs.append(temp)
+                # out.append(filename)
+        else:
+            graphs.append(graph)
+            # out.append(filename)
+    return graphs
+
+
 main(k_leaf_power)
 
 

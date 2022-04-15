@@ -20,21 +20,22 @@ def draw_graph(g, title=None, isTree=False):
     plt.show()
 
 
-def draw_graphs(g, title=None):
+def draw_graphs(g, title=None, subtitles=None):
     total = len(g)
     cols = 3
     rows = total // cols
     rows += total % cols
     position = range(1, total + 1)
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(10, 12))
     plt.title(title, pad=35, fontsize=16)
     plt.axis('off')
     for k in range(total):
         ax = fig.add_subplot(rows, cols, position[k])
-        ax.set_title('Graph {}'.format(k + 1))
-        nx.draw_shell(g[k], with_labels='True', font_color='#bab0ac', node_color='#4e79a7')  
+        ax.set_title(subtitles[k] if subtitles is not None else f'G{k + 1}')
+        nx.draw(g[k], with_labels='True', font_color='#bab0ac', node_color='#4e79a7')
     plt.tight_layout()
     plt.show()
+
 
 def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter = 0.5):
     """
@@ -71,7 +72,7 @@ def hierarchy_pos(G, root=None, width=1., vert_gap = 0.2, vert_loc = 0, xcenter 
             for child in children:
                 nextx += dx
                 pos = _hierarchy_pos(G,child, width = dx, vert_gap = vert_gap, 
-                                    vert_loc = vert_loc-vert_gap, xcenter=nextx,
+                                    vert_loc=vert_loc - vert_gap, xcenter=nextx,
                                     pos=pos, parent = root)
         return pos
 
