@@ -4,8 +4,7 @@ from Logic import *
 from Graph_Draw import *
 
 
-k_leaf_power = 4
-
+k_leaf_power = 5
 
 def main(k_leaf_power):
     # make the list of all graphs smaller if it contains a forbidden induced subgraph
@@ -13,7 +12,9 @@ def main(k_leaf_power):
     all_graphs_g6 = set()
     all_canonized_induced_subgraphs = []
     all_canonized_induced_subgraphs_g6 = set()
-    all_forbidden_dict = {}
+    all_forbiddens = set()
+    
+    min_forbiddens = set()
     minimal_forbidden_dict = {}
 
 
@@ -31,30 +32,36 @@ def main(k_leaf_power):
     for i in range(len(all_graphs)):
         all_graphs_g6.add(all_graphs[i][0])
 
-    for graph_size in range(3, 5):
-        file_path = f'induced_subgraphs/{k_leaf_power}_leaf_power_canonized.g6'
+    for graph_size in range(3, k_leaf_power + 1):
+        file_path = f'induced_subgraphs/{graph_size}_leaf_power_canonized.g6'
         get_byte_strings(file_path, all_canonized_induced_subgraphs)
 
-    for j in range(len(all_canonized_induced_subgraphs)):
-        all_canonized_induced_subgraphs_g6.add(all_canonized_induced_subgraphs[j][0])
+        for j in range(len(all_canonized_induced_subgraphs)):
+            all_canonized_induced_subgraphs_g6.add(all_canonized_induced_subgraphs[j][0])
 
-    four_node_induced = set()
-    for pair in all_canonized_induced_subgraphs:
-        four_node_induced.add(pair[0])
+        four_node_induced = set()
+        for pair in all_canonized_induced_subgraphs:
+            four_node_induced.add(pair[0])
 
-    all_forbiddens = all_graphs_g6 - four_node_induced
-    # print(all_forbiddens)
-    min_forbiddens = set()
-    all_forbiddens = sorted(all_forbiddens, key=lambda x: len(x))
+        all_forbiddens = all_graphs_g6 - four_node_induced
+        # print(all_forbiddens)
+        
+        all_forbiddens_list = sorted(all_forbiddens, key=lambda x: len(x))
+        #Keeping track of new minimal forbiddens based on k leaf power
+        temp_min_forbiddens = min_forbiddens
 
-    for f_graph in all_forbiddens:
-        if not graph_contains(f_graph, min_forbiddens):
-            if not nx.is_tree(nx.from_graph6_bytes(f_graph.encode('utf-8'))):
+        for f_graph in all_forbiddens_list:
+            if not graph_contains(f_graph, min_forbiddens):
                 min_forbiddens.add(f_graph)
 
-    print(len(min_forbiddens))
-    min_forbiddens_g = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
-    draw_graphs(min_forbiddens_g, '4-leaf powers minimal forbiddens')
+        
+
+        minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
+
+    for k,v in minimal_forbidden_dict.items():
+        draw_graphs(v, f'{k}-leaf power minimal forbiddens')
+    #print(len(min_forbiddens))
+        
 
 
     # trees = load_all_graphs(20)
