@@ -1,10 +1,12 @@
 import os
 from os.path import exists
-from Logic import *
 from Graph_Draw import *
+import time
+import itertools
 
 
 k_leaf_power = 5
+
 
 def main(k_leaf_power):
     # make the list of all graphs smaller if it contains a forbidden induced subgraph
@@ -15,10 +17,13 @@ def main(k_leaf_power):
     
     minimal_forbidden_dict = {}
 
+    # timing
+    start_time = time.perf_counter()
 
     # loads all chosen graphs of input size 4 - whatever into all_graphs
-    for graph_size in range(4, 9):
-        file_path = f'labeled_graphs/std_geng{graph_size}_cl.g6'
+    for graph_size in range(4, 11):
+        file_path = f'chordal_graphs/chordal_labelled{graph_size}.g6'
+        # file_path = f'labeled_graphs/std_geng{graph_size}_cl.g6'
         # loads in all graphs of node number index
 
         get_byte_strings(file_path, all_graphs)
@@ -31,6 +36,7 @@ def main(k_leaf_power):
         all_graphs_g6.add(all_graphs[i][0])
 
     for graph_size in range(3, k_leaf_power + 1):
+        print(f'{graph_size}-leaf power started')
         file_path = f'induced_subgraphs/{graph_size}_leaf_power_canonized.g6'
         get_byte_strings(file_path, all_canonized_induced_subgraphs)
 
@@ -51,21 +57,26 @@ def main(k_leaf_power):
             if not graph_contains(f_graph, min_forbiddens):
                 min_forbiddens.add(f_graph)
 
-    
         minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
+        print(f'{graph_size}-leaf power finished')
 
-    while True:
-        for k,v in minimal_forbidden_dict.items():
-            counter = 0
-            if len(v) > 12:
-                for i in range(len(v)//12 + 1):
-                    temp_v = v[counter: counter + 12]
-                    draw_graphs(temp_v, f'{k}-leaf power minimal forbiddens pg. {(counter/12)}', subtitles=[build_graph_key(x) for x in temp_v])
-                    counter += 12
-            else:
-                draw_graphs(v, f'{k}-leaf power minimal forbiddens', subtitles=[build_graph_key(x) for x in v])
-        #print(len(min_forbiddens))
-        
+    # for k, v in minimal_forbidden_dict.items():
+    #     counter = 0
+    #     if len(v) > 12:
+    #         for i in range(len(v)//12 + 1):
+    #             temp_v = v[counter: counter + 12]
+    #             draw_graphs(temp_v, f'{k}-leaf power minimal forbiddens pg. {(counter/12)}', subtitles=[build_graph_key(x) for x in temp_v])
+    #             counter += 12
+    #     else:
+    #         draw_graphs(v, f'{k}-leaf power minimal forbiddens', subtitles=[build_graph_key(x) for x in v])
+        # print(len(min_forbiddens))
+
+    end_time = time.perf_counter()
+    print('Only chordal graphs\n')
+    print(f'Runtime: {int(end_time - start_time)}s')
+    for k, v in minimal_forbidden_dict.items():
+        print(k, len(v))
+
 
 
     # trees = load_all_graphs(20)
@@ -88,28 +99,6 @@ def get_byte_strings(filename, graph_set):
         for line in lines:
             graph_set.append((line.strip(), temp_graph_list[counter]))
             counter += 1
-
-
-def contains_known_forbidden_subgraph(all_forbidden_dict, graphs, index):
-    """
-    Function to check if a subgraph of each graph in graphs is contained in the list of known minimal forbidden
-    induced subgraphs for k-leaf powers.
-
-    :param all_forbidden_dict: dictionary containing all known minimal forbidden induced subgraphs
-    :param graphs: list of graphs over which to compare to graphs in all_forbidden_dict
-    :param index:
-    :return: True if graph is found, False otherwise
-    """
-
-    # if all_forbidden_dict is empty, it cannot contain a forbidden subgraph
-    if not bool(all_forbidden_dict):
-        return False
-
-    for graph in graphs:
-        if index in all_forbidden_dict.keys():
-            if build_graph_key(graph) in all_forbidden_dict[index - 1]:
-                return True
-    return False
 
 
 def remove_one_node(graph):
