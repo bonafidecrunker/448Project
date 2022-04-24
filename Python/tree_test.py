@@ -1,11 +1,12 @@
 import os
 from os.path import exists
+import networkx as nx
 from Graph_Draw import *
 import time
 import itertools
 
 
-k_leaf_power = 5
+k_leaf_power = 6
 
 
 def main(k_leaf_power):
@@ -52,13 +53,23 @@ def main(k_leaf_power):
         all_forbiddens_list = sorted(all_forbiddens, key=lambda x: len(x))
         
         min_forbiddens = set()
-        
+
         for f_graph in all_forbiddens_list:
             if not graph_contains(f_graph, min_forbiddens):
                 min_forbiddens.add(f_graph)
 
-        minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
-        print(f'{graph_size}-leaf power finished')
+        # minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
+        # draw_graphs(minimal_forbidden_dict[3], f'{graph_size}-leaf power graphs')
+        # print(f'{graph_size}-leaf power finished')
+
+        file_path = f'all_forbidden_graphs/{graph_size}_leaf_forbiddens.g6'
+
+        for g in all_forbiddens_list:
+            temp = nx.from_graph6_bytes(g.encode('utf-8'))
+            nx.write_graph6(temp, file_path, header=False)
+
+        print(f'{graph_size}-leaf power written to file')
+
 
     # for k, v in minimal_forbidden_dict.items():
     #     counter = 0
@@ -71,11 +82,11 @@ def main(k_leaf_power):
     #         draw_graphs(v, f'{k}-leaf power minimal forbiddens', subtitles=[build_graph_key(x) for x in v])
         # print(len(min_forbiddens))
 
-    end_time = time.perf_counter()
-    print('Only chordal graphs\n')
-    print(f'Runtime: {int(end_time - start_time)}s')
-    for k, v in minimal_forbidden_dict.items():
-        print(k, len(v))
+    # end_time = time.perf_counter()
+    # print('Only chordal graphs\n')
+    # print(f'Runtime: {int(end_time - start_time)}s')
+    # for k, v in minimal_forbidden_dict.items():
+    #     print(k, len(v))
 
 
 
