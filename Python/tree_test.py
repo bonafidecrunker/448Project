@@ -18,9 +18,6 @@ def main(k_leaf_power):
     
     minimal_forbidden_dict = {}
 
-    # timing
-    start_time = time.perf_counter()
-
     # loads all chosen graphs of input size 4 - whatever into all_graphs
     for graph_size in range(4, 11):
         file_path = f'chordal_graphs/chordal_labelled{graph_size}.g6'
@@ -28,15 +25,11 @@ def main(k_leaf_power):
         # loads in all graphs of node number index
 
         get_byte_strings(file_path, all_graphs)
-        # for g in graphs:
-        #     key = build_graph_key(g)
-        #     all_graphs_g6.add(g)
-        #     all_graphs.setdefault(key, []).append(g)
 
     for i in range(len(all_graphs)):
         all_graphs_g6.add(all_graphs[i][0])
 
-    for graph_size in range(3, k_leaf_power + 1):
+    for graph_size in range(5, k_leaf_power + 1):
         print(f'{graph_size}-leaf power started')
         file_path = f'induced_subgraphs/{graph_size}_leaf_power_canonized.g6'
         get_byte_strings(file_path, all_canonized_induced_subgraphs)
@@ -58,17 +51,17 @@ def main(k_leaf_power):
             if not graph_contains(f_graph, min_forbiddens):
                 min_forbiddens.add(f_graph)
 
-        # minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
-        # draw_graphs(minimal_forbidden_dict[3], f'{graph_size}-leaf power graphs')
-        # print(f'{graph_size}-leaf power finished')
+        minimal_forbidden_dict[graph_size] = [nx.from_graph6_bytes(n.encode("utf-8")) for n in min_forbiddens]
+        draw_graphs(minimal_forbidden_dict[3], f'{graph_size}-leaf power graphs')
+        print(f'{graph_size}-leaf power finished')
 
-        file_path = f'all_forbidden_graphs/{graph_size}_leaf_forbiddens.g6'
+        # file_path = f'all_forbidden_graphs/{graph_size}_leaf_forbiddens.g6'
 
-        for g in all_forbiddens_list:
-            temp = nx.from_graph6_bytes(g.encode('utf-8'))
-            nx.write_graph6(temp, file_path, header=False)
-
-        print(f'{graph_size}-leaf power written to file')
+        # for g in all_forbiddens_list:
+        #     temp = nx.from_graph6_bytes(g.encode('utf-8'))
+        #     nx.write_graph6(temp, file_path, header=False)
+        #
+        # print(f'{graph_size}-leaf power written to file')
 
 
     # for k, v in minimal_forbidden_dict.items():
@@ -82,24 +75,22 @@ def main(k_leaf_power):
     #         draw_graphs(v, f'{k}-leaf power minimal forbiddens', subtitles=[build_graph_key(x) for x in v])
         # print(len(min_forbiddens))
 
-    # end_time = time.perf_counter()
-    # print('Only chordal graphs\n')
-    # print(f'Runtime: {int(end_time - start_time)}s')
-    # for k, v in minimal_forbidden_dict.items():
-    #     print(k, len(v))
 
-
-
-    # trees = load_all_graphs(20)
-    # # loop starts here - k leaf power loop
-    # for power in range(6, k_leaf_power + 1):
-    #     print(f'{power} leaf powers\n')
-    #     for tree in trees:
-    #         nbunch = get_leaf_nodes(tree)
-    #         temp_graph = nx.power(tree, power)
-    #         induced_graph = nx.induced_subgraph(temp_graph, nbunch)
-    #         if nx.is_connected(induced_graph):
-    #             nx.write_graph6(induced_graph, f'induced_subgraphs\\{power}_leaf_power_induced_subgraphs.g6', header=False)
+def gen_induced_subgraph_g6_files(k_leaf_power):
+    trees = load_all_graphs(25)
+    for power in range(6, k_leaf_power + 1):
+        counter = 0
+        print(f'{power} leaf powers\n')
+        for tree in trees:
+            nbunch = get_leaf_nodes(tree)
+            temp_graph = nx.power(tree, power)
+            induced_graph = nx.induced_subgraph(temp_graph, nbunch)
+            counter += 1
+            if nx.is_connected(induced_graph):
+                nx.write_graph6(induced_graph, f'induced_subgraphs\\{power}_leaf_power_induced_subgraphs.g6', header=False)
+        x = counter % (len(trees) / 100)
+        if x == 0:
+            print(f'{x * 100:2f} % completed')
 
 
 def get_byte_strings(filename, graph_set):
@@ -156,7 +147,7 @@ def get_leaf_nodes(graph):
     return out
 
 
-def load_all_graphs(index=15):
+def load_all_graphs(index):
     """
     Loads all graphs of given diameter index for all trees. Returns a set networkx graphs.
 
@@ -165,11 +156,9 @@ def load_all_graphs(index=15):
     """
     graphs = set()
     for i in range(4, index + 1):
-        nodes_and_diameters = [i for i in range(index + 1)]  # default value is 15 but can be higher if we want
-        for nodes in nodes_and_diameters:
-            filename_ends_with = str(nodes) + '.' + str(i) + '.g6'
-            temp_graphs = load_all_graphs_helper(filename_ends_with)
-            graphs.update(temp_graphs)
+        filename_ends_with = f'{i}_node_trees.g6'
+        temp_graphs = load_all_graphs_helper(filename_ends_with)
+        graphs.update(temp_graphs)
     return graphs
 
 
@@ -181,8 +170,8 @@ def load_all_graphs_helper(file_ends_with='.g6'):
     :return: a set of graphs from the g6 file
     """
     graphs_set = set()
-    directory = os.fsdecode('partitioned_trees')
-    temp = '{0}\\Tree{1}'.format(str(directory), str(file_ends_with))
+    directory = os.fsdecode('tree_files')
+    temp = '{0}\\{1}'.format(str(directory), str(file_ends_with))
     if exists(temp):
         graph = nx.read_graph6(temp)
 
@@ -277,7 +266,8 @@ def load_g6_leaf2():
     return graphs
 
 
-main(k_leaf_power)
+# main(k_leaf_power)
+gen_induced_subgraph_g6_files(k_leaf_power)
 
 
 class G6_NX_Graphs:
