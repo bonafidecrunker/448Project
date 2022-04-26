@@ -77,7 +77,7 @@ def main(k_leaf_power):
 
 
 def gen_induced_subgraph_g6_files(k_leaf_power):
-    trees = load_all_graphs(4)
+    trees = load_all_graphs(25)
     for power in range(6, k_leaf_power + 1):
         counter = 0
         print(f'{power} leaf powers\n')
@@ -172,7 +172,6 @@ def load_all_graphs_helper(file_ends_with='.g6'):
     graphs_set = set()
     directory = os.fsdecode('tree_files')
     temp = '{0}\\{1}'.format(str(directory), str(file_ends_with))
-    print(temp)
     if exists(temp):
         with open(temp, 'r') as file:
             for line in file.readlines():
@@ -185,7 +184,6 @@ def load_all_graphs_helper(file_ends_with='.g6'):
                         graphs_set.add(temp_graph)
                 else:
                     graphs_set.add(graph)
-    print(graphs_set)
     return graphs_set
 
 
